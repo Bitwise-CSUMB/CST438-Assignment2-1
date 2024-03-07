@@ -11,7 +11,48 @@ public class Grade {
  
     // TODO complete this class
     // add additional attribute for score
+    private Integer score;
+
     // add relationship between grade and assignment entities
+    @ManyToOne
+    @JoinColumn(name="assignment_id", nullable=false)
+    private Assignment assignment;
+
     // add relationship between grade and enrollment entities
+    @ManyToOne
+    @JoinColumn(name="enrollment_id", nullable=false)
+    private Enrollment enrollment;
+
     // add getter/setter methods
+    public int getGradeId() {
+        return this.gradeId;
+    }
+
+    public void setGradeId(int gradeId) {
+        this.gradeId = gradeId;
+    }
+
+    public Integer getScore() {
+        return this.score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public Assignment getAssignment() {
+        return this.assignment;
+    }
+
+    public void setAssignment(Assignment assignment) {
+        this.assignment = assignment;
+    }
+
+    public Enrollment getEnrollment() {
+        return this.enrollment;
+    }
+
+    public void setEnrollment(Enrollment enrollment) {
+        this.enrollment = enrollment;
+    }
 }
