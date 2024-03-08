@@ -60,4 +60,8 @@ public class Assignment {
     public void setSection(Section section) {
         this.section = section;
     }
+
+    public List<Grade> getGrades() {
+        return this.grades;
+    }
 }

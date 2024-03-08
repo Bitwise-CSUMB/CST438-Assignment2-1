@@ -7,7 +7,11 @@ import java.util.List;
 
 public interface AssignmentRepository extends CrudRepository<Assignment, Integer> {
 
-    // TODO uncomment the following lines as needed
+    @Query("select a from Assignment a")
+    List<Assignment> findAllAssignments();
+
+    @Query("select a from Assignment a where a.assignmentId=:assignmentId")
+    Assignment findByAssignmentId(int assignmentId);
 
     @Query("select a from Assignment a where a.section.sectionNo=:sectionNo order by a.dueDate")
     List<Assignment> findBySectionNoOrderByDueDate(int sectionNo);

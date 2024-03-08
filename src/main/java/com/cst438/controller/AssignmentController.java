@@ -3,14 +3,12 @@ package com.cst438.controller;
 import com.cst438.domain.*;
 import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.AssignmentStudentDTO;
+import com.cst438.dto.CourseDTO;
 import com.cst438.dto.GradeDTO;
+import com.cst438.dto.EnrollmentDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 
@@ -21,6 +19,14 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class AssignmentController {
 
+    @Autowired
+    AssignmentRepository assignmentRepository;
+
+    @Autowired
+    GradeRepository gradeRepository;
+
+    @Autowired
+    EnrollmentRepository enrollmentRepository;
 
     // instructor lists assignments for a section.  Assignments ordered by due date.
     // logged in user must be the instructor for the section
@@ -74,7 +80,6 @@ public class AssignmentController {
     public List<GradeDTO> getAssignmentGrades(@PathVariable("assignmentId") int assignmentId) {
 
         // TODO remove the following line when done
-
         // get the list of enrollments for the section related to this assignment.
 		// hint: use te enrollment repository method findEnrollmentsBySectionOrderByStudentName.
         // for each enrollment, get the grade related to the assignment and enrollment
@@ -82,7 +87,26 @@ public class AssignmentController {
         //   if the grade does not exist, create a grade entity and set the score to NULL
         //   and then save the new entity
 
-        return null;
+        Assignment a = assignmentRepository.findByAssignmentId(assignmentId);
+        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsBySectionNoOrderByStudentName(a.getSection().getSectionNo());
+
+        List<GradeDTO> grades = new ArrayList<GradeDTO>();
+        for (Enrollment e : enrollments) {
+            Grade g = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), a.getAssignmentId());
+            Section s = a.getSection();
+            Course c = s.getCourse();
+            User u = e.getUser();
+
+            if (g != null) {
+                grades.add(new GradeDTO(g.getGradeId(), u.getName(), u.getEmail(), 
+                            a.getTitle(), c.getCourseId(), s.getSecId(), g.getScore()));
+            } else {
+                grades.add(new GradeDTO(new Grade().getGradeId(), u.getName(), u.getEmail(), 
+                            a.getTitle(), c.getCourseId(), s.getSecId(), null));
+            }
+        }
+
+        return grades;
     }
 
     // instructor uploads grades for assignment
@@ -96,8 +120,6 @@ public class AssignmentController {
         // update the score and save the entity
 
     }
-
-
 
     // student lists their assignments/grades for an enrollment ordered by due date
     // student must be enrolled in the section
@@ -114,5 +136,15 @@ public class AssignmentController {
 		//  hint: use the assignment repository method findByStudentIdAndYearAndSemesterOrderByDueDate
 
         return null;
+    }
+
+    @GetMapping("/allassignments")
+    public List<AssignmentDTO> getAllAssignments() {
+        List<Assignment> assignments = assignmentRepository.findAllAssignments();
+        List<AssignmentDTO> dto_list = new ArrayList<>();
+        for (Assignment a : assignments) {
+            dto_list.add(new AssignmentDTO(a.getAssignmentId(), a.getTitle(), a.getDueDate().toString(), a.getSection().getCourse().getCourseId(), a.getSection().getSecId(), a.getSection().getSectionNo()));
+        }
+        return dto_list;
     }
 }
