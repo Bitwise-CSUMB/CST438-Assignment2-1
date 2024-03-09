@@ -5,27 +5,27 @@ import jakarta.persistence.*;
 import java.sql.Date;
 import java.util.List;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 @Entity
 public class Assignment {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="assignment_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "assignment_id")
     private int assignmentId;
-    
+
     // add additional attributes for title, dueDate
     private String title;
-
-    @Column(name="due_date")
+    @Column(name = "due_date")
     private Date dueDate;
 
     // add relationship between assignment and section entities
     @ManyToOne
-    @JoinColumn(name="section_no", nullable=false)
+    @JoinColumn(name = "section_no", nullable = false)
     private Section section;
 
     // One to many relationship to grade
-    @OneToMany(mappedBy="assignment")
+    @OneToMany(mappedBy = "assignment")
     List<Grade> grades;
 
     // add getter and setter methods

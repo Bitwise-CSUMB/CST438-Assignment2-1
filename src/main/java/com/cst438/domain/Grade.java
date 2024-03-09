@@ -5,22 +5,23 @@ import jakarta.persistence.*;
 @Entity
 public class Grade {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="grade_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "grade_id")
     private int gradeId;
- 
+
     // TODO complete this class
+
     // add additional attribute for score
     private Integer score;
 
     // add relationship between grade and assignment entities
     @ManyToOne
-    @JoinColumn(name="assignment_id", nullable=false)
+    @JoinColumn(name = "assignment_id", nullable = false)
     private Assignment assignment;
 
     // add relationship between grade and enrollment entities
     @ManyToOne
-    @JoinColumn(name="enrollment_id", nullable=false)
+    @JoinColumn(name = "enrollment_id", nullable = false)
     private Enrollment enrollment;
 
     // add getter/setter methods
