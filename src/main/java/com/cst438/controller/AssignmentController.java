@@ -96,7 +96,7 @@ public class AssignmentController {
             Grade g = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), a.getAssignmentId());
             Section s = a.getSection();
             Course c = s.getCourse();
-            User u = e.getStudent();
+            User u = e.getUser();
 
             if (g != null) {
                 grades.add(new GradeDTO(g.getGradeId(), u.getName(), u.getEmail(),

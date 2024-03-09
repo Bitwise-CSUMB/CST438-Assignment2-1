@@ -18,7 +18,7 @@ public class Enrollment {
     // create relationship between enrollment and user entities
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User student;
+    private User user;
 
     // create relationship between enrollment and section entities
     @ManyToOne
@@ -46,12 +46,12 @@ public class Enrollment {
         this.grade = grade;
     }
 
-    public User getStudent() {
-        return this.student;
+    public User getUser() {
+        return this.user;
     }
 
-    public void setStudent(User student) {
-        this.student = student;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Section getSection() {
