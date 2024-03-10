@@ -50,7 +50,7 @@ public class AssignmentController {
         List<Assignment> assignments = assignmentRepository.findBySectionNoOrderByDueDate(secNo);
 
         if (assignments.size() == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found " + secNo);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section " + secNo + " not found");
         }
 
         // Convert Assignment entities to DTOs
@@ -75,7 +75,7 @@ public class AssignmentController {
 
         Section s = sectionRepository.findById(assignmentDTO.secId()).orElse(null);
         if (s == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found " + s.getSecId());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section " + s.getSecId() + " not found");
         }
 
         Assignment a = new Assignment();
@@ -94,7 +94,7 @@ public class AssignmentController {
 
         Assignment a = assignmentRepository.findById(assignmentDTO.id()).orElse(null);
         if (a == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found " + assignmentDTO.id());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment " + assignmentDTO.id() + " not found");
         }
         return getAssignmentDTO(assignmentDTO, a);
     }
@@ -104,14 +104,14 @@ public class AssignmentController {
         Assignment a) {
         a.setTitle(assignmentDTO.title());
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date dueDate;
+        java.sql.Date sqlDueDate;
         try {
-            dueDate = (Date) dateFormat.parse(assignmentDTO.dueDate());
-        } catch (ParseException e) {
+            // Parse the string directly into a java.sql.Date object
+            sqlDueDate = java.sql.Date.valueOf(assignmentDTO.dueDate());
+        } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid due date format");
         }
-        a.setDueDate(dueDate);
+        a.setDueDate(sqlDueDate);
 
         assignmentRepository.save(a);
 
@@ -126,13 +126,13 @@ public class AssignmentController {
     }
 
     // delete assignment for a section
-    // logged in user must be instructor of the section
+    // logged-in user must be instructor of the section
     @DeleteMapping("/assignments/{assignmentId}")
     public void deleteAssignment(@PathVariable("assignmentId") int assignmentId) {
 
         Assignment a = assignmentRepository.findByAssignmentId(assignmentId);
         if (a == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found " + assignmentId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment " + assignmentId + " not found");
         }
         assignmentRepository.delete(a);
 
@@ -191,7 +191,7 @@ public class AssignmentController {
                 gradeRepository.save(grade);
             } else {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Invalid grade " + gradeDTO.gradeId());
+                    "Invalid gradeId: " + gradeDTO.gradeId());
             }
         }
 
@@ -210,19 +210,21 @@ public class AssignmentController {
         // hint: use the assignment repository method
         // findByStudentIdAndYearAndSemesterOrderByDueDate
 
-        List<Assignment> assignments = assignmentRepository.findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
-        List<AssignmentStudentDTO> dto_list = new ArrayList<>();
-        for (Assignment a : assignments) {
-            // Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId()...
-            dto_list.add(new AssignmentStudentDTO(
-                a.getAssignmentId(),
-                a.getTitle(),
-                a.getDueDate().toString(),
-                a.getSection().getCourse().getCourseId(),
-                a.getSection().getSecId(),
-                ); // TODO finish finding grade for each assignment using enrollmentId and assignmentId
-        }
-        return dto_list;
+//        List<Assignment> assignments = assignmentRepository.findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
+//        List<AssignmentStudentDTO> dto_list = new ArrayList<>();
+//        for (Assignment a : assignments) {
+//            // Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId()...
+//            dto_list.add(new AssignmentStudentDTO(
+//            dto_list.add(new AssignmentStudentDTO(
+//                a.getAssignmentId(),
+//                a.getTitle(),
+//                a.getDueDate().toString(),
+//                a.getSection().getCourse().getCourseId(),
+//                a.getSection().getSecId(),
+//                ); // TODO finish finding grade for each assignment using enrollmentId and assignmentId
+//        }
+//        return dto_list;
+        return null;
     }
 
     @GetMapping("/allassignments")
