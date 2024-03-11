@@ -26,7 +26,7 @@ public class Enrollment {
     private Section section;
 
     // One to Many relationship between enrollment and grade
-    @OneToMany
+    @OneToMany(mappedBy = "enrollment", cascade = CascadeType.REMOVE)
     List<Grade> grades;
 
     // add getter/setter methods

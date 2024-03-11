@@ -153,7 +153,6 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Drop deadline has been exceeded");
         }
 
-        // TODO: This throws an exception
         enrollmentRepository.delete(enrollment);
     }
 }
