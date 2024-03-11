@@ -57,4 +57,8 @@ public class Enrollment {
     public Section getSection() {
         return this.section;
     }
+
+    public void setSection(Section section) {
+        this.section = section;
+    }
 }
