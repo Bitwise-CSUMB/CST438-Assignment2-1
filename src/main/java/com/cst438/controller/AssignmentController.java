@@ -210,21 +210,36 @@ public class AssignmentController {
         // hint: use the assignment repository method
         // findByStudentIdAndYearAndSemesterOrderByDueDate
 
-//        List<Assignment> assignments = assignmentRepository.findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
-//        List<AssignmentStudentDTO> dto_list = new ArrayList<>();
-//        for (Assignment a : assignments) {
-//            // Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId()...
-//            dto_list.add(new AssignmentStudentDTO(
-//            dto_list.add(new AssignmentStudentDTO(
-//                a.getAssignmentId(),
-//                a.getTitle(),
-//                a.getDueDate().toString(),
-//                a.getSection().getCourse().getCourseId(),
-//                a.getSection().getSecId(),
-//                ); // TODO finish finding grade for each assignment using enrollmentId and assignmentId
-//        }
-//        return dto_list;
-        return null;
+        List<Assignment> assignments = assignmentRepository.findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
+        if (assignments == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No assignments found for studentId " + studentId
+            + " in the year " + year + " in the semester " + semester);
+        }
+        List<AssignmentStudentDTO> dto_list = new ArrayList<>();
+        for (Assignment a : assignments) {
+            Enrollment e = enrollmentRepository.findEnrollmentBySectionNoAndStudentId(a.getSection().getSectionNo(), studentId);
+            Grade g = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), a.getAssignmentId());
+            if (g != null) {
+                dto_list.add(new AssignmentStudentDTO(
+                    a.getAssignmentId(),
+                    a.getTitle(),
+                    a.getDueDate(),
+                    a.getSection().getCourse().getCourseId(),
+                    a.getSection().getSecId(),
+                    g.getScore()
+                ));
+            } else {
+                dto_list.add(new AssignmentStudentDTO(
+                    a.getAssignmentId(),
+                    a.getTitle(),
+                    a.getDueDate(),
+                    a.getSection().getCourse().getCourseId(),
+                    a.getSection().getSecId(),
+                    null
+                ));
+            }
+        }
+        return dto_list;
     }
 
     @GetMapping("/allassignments")
