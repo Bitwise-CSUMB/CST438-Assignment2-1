@@ -63,7 +63,6 @@ public class AssignmentController {
                 assignment.getSection().getSecId(),
                 assignment.getSection().getSectionNo()))
             .collect(Collectors.toList());
-
     }
 
     // add assignment
@@ -135,7 +134,6 @@ public class AssignmentController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment " + assignmentId + " not found");
         }
         assignmentRepository.delete(a);
-
     }
 
     // instructor gets grades for assignment ordered by student name
@@ -152,6 +150,11 @@ public class AssignmentController {
         // and then save the new entity
 
         Assignment a = assignmentRepository.findByAssignmentId(assignmentId);
+
+        if (a == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment " + assignmentId + " not found");
+        }
+
         List<Enrollment> enrollments = enrollmentRepository
                 .findEnrollmentsBySectionNoOrderByStudentName(a.getSection().getSectionNo());
 
