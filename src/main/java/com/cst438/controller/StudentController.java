@@ -28,11 +28,8 @@ public class StudentController {
 
     private User validateStudent(int studentId) {
 
-        User user = userRepository.findById(studentId).orElse(null);
-
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown studentId");
-        }
+        User user = userRepository.findById(studentId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown studentId"));
 
         if (!user.getType().equals("STUDENT")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid studentId");
@@ -99,11 +96,8 @@ public class StudentController {
         // create a new enrollment entity and save.  The enrollment grade will
         // be NULL until instructor enters final grades for the course.
 
-        Section section = sectionRepository.findById(sectionNo).orElse(null);
-
-        if (section == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown sectionNo");
-        }
+        Section section = sectionRepository.findById(sectionNo).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown sectionNo"));
 
         User user = validateStudent(studentId);
 
@@ -114,10 +108,7 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course cannot be added at this time");
         }
 
-        Enrollment existingEnrollment = enrollmentRepository
-            .findEnrollmentBySectionNoAndStudentId(sectionNo, studentId);
-
-        if (existingEnrollment != null) {
+        if (enrollmentRepository.findEnrollmentBySectionNoAndStudentId(sectionNo, studentId) != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "studentId is already enrolled in sectionNo");
         }
 
@@ -137,11 +128,8 @@ public class StudentController {
     {
         // check that today is not after the dropDeadline for section
 
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElse(null);
-
-        if (enrollment == null) {
-            return;
-        }
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown enrollmentId"));
 
         if (!enrollment.getUser().getType().equals("STUDENT")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only students can drop a course");
