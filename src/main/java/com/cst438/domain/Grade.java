@@ -9,8 +9,6 @@ public class Grade {
     @Column(name = "grade_id")
     private int gradeId;
 
-    // TODO complete this class
-
     // add additional attribute for score
     private Integer score;
 

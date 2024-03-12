@@ -10,8 +10,6 @@ public class Enrollment {
     @Column(name = "enrollment_id")
     int enrollmentId;
 
-    // TODO complete this class
-
     // add additional attribute for grade
     private String grade;
 
