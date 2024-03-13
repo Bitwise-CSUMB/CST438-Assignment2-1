@@ -49,8 +49,8 @@ public class AssignmentController {
         // Fetch assignments from repository
         List<Assignment> assignments = assignmentRepository.findBySectionNoOrderByDueDate(secNo);
 
-        if (assignments.size() == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section " + secNo + " not found");
+        if (assignments.isEmpty()) {
+            return new ArrayList<AssignmentDTO>();
         }
 
         // Convert Assignment entities to DTOs
@@ -72,10 +72,9 @@ public class AssignmentController {
     public AssignmentDTO createAssignment(
             @RequestBody AssignmentDTO assignmentDTO) {
 
-        Section s = sectionRepository.findById(assignmentDTO.secId()).orElse(null);
-        if (s == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section " + s.getSecId() + " not found");
-        }
+        Section s = sectionRepository.findById(assignmentDTO.secId()).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Section " + assignmentDTO.secId() + " not found"));
+
 
         Assignment a = new Assignment();
         a.setSection(s);
@@ -91,10 +90,8 @@ public class AssignmentController {
     @PutMapping("/assignments")
     public AssignmentDTO updateAssignment(@RequestBody AssignmentDTO assignmentDTO) {
 
-        Assignment a = assignmentRepository.findById(assignmentDTO.id()).orElse(null);
-        if (a == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment " + assignmentDTO.id() + " not found");
-        }
+        Assignment a = assignmentRepository.findById(assignmentDTO.id()).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found for ID: " + assignmentDTO.id()));
         return getAssignmentDTO(assignmentDTO, a);
     }
 
@@ -130,9 +127,6 @@ public class AssignmentController {
     public void deleteAssignment(@PathVariable("assignmentId") int assignmentId) {
 
         Assignment a = assignmentRepository.findByAssignmentId(assignmentId);
-        if (a == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment " + assignmentId + " not found");
-        }
         assignmentRepository.delete(a);
     }
 
@@ -214,7 +208,7 @@ public class AssignmentController {
         // findByStudentIdAndYearAndSemesterOrderByDueDate
 
         List<Assignment> assignments = assignmentRepository.findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
-        if (assignments == null) {
+        if (assignments.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No assignments found for studentId " + studentId
             + " in the year " + year + " in the semester " + semester);
         }

@@ -2,6 +2,7 @@ package com.cst438.controller;
 
 import com.cst438.domain.Enrollment;
 import com.cst438.domain.EnrollmentRepository;
+import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.EnrollmentDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,15 +28,14 @@ public class EnrollmentController {
     public List<EnrollmentDTO> getEnrollments(
             @PathVariable("sectionNo") int sectionNo) {
 
-        // TODO
         // hint: use enrollment repository findEnrollmentsBySectionNoOrderByStudentName
         // method
 
         // Fetch enrollments from repository
         List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsBySectionNoOrderByStudentName(sectionNo);
 
-        if (enrollments.size() == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Section not found " + sectionNo);
+        if (enrollments.isEmpty()) {
+            return new ArrayList<EnrollmentDTO>();
         }
 
         // Convert Enrollment entities to DTOs
@@ -63,7 +63,6 @@ public class EnrollmentController {
     @PutMapping("/enrollments")
     public void updateEnrollmentGrade(@RequestBody List<EnrollmentDTO> dlist) {
 
-        // TODO
         // For each EnrollmentDTO in the list
         for (EnrollmentDTO enrollmentDTO : dlist) {
             // find the Enrollment entity using enrollmentId
