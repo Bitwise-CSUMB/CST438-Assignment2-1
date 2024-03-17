@@ -72,8 +72,8 @@ public class AssignmentController {
     public AssignmentDTO createAssignment(
             @RequestBody AssignmentDTO assignmentDTO) {
 
-        Section s = sectionRepository.findById(assignmentDTO.secId()).orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "Section " + assignmentDTO.secId() + " not found"));
+        Section s = sectionRepository.findById(assignmentDTO.secNo()).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Section " + assignmentDTO.secNo() + " not found"));
 
 
         Assignment a = new Assignment();
