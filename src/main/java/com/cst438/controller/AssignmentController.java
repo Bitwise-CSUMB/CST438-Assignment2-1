@@ -159,13 +159,16 @@ public class AssignmentController {
             Course c = s.getCourse();
             User u = e.getUser();
 
-            if (g != null) {
-                grades.add(new GradeDTO(g.getGradeId(), u.getName(), u.getEmail(),
-                        a.getTitle(), c.getCourseId(), s.getSecId(), g.getScore()));
-            } else {
-                grades.add(new GradeDTO(new Grade().getGradeId(), u.getName(), u.getEmail(),
-                        a.getTitle(), c.getCourseId(), s.getSecId(), null));
+            if (g == null) {
+                g = new Grade();
+                g.setAssignment(a);
+                g.setEnrollment(e);
+                g.setScore(null);
+                gradeRepository.save(g);
             }
+            GradeDTO dto = new GradeDTO(g.getGradeId(), u.getName(), u.getEmail(),
+                        a.getTitle(), c.getCourseId(), s.getSecId(), g.getScore());
+            grades.add(dto);
         }
 
         return grades;
