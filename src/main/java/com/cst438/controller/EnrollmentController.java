@@ -39,23 +39,7 @@ public class EnrollmentController {
         }
 
         // Convert Enrollment entities to DTOs
-        return enrollments.stream()
-                .map(enrollment -> new EnrollmentDTO(
-                        enrollment.getEnrollmentId(),
-                        enrollment.getGrade(),
-                        enrollment.getUser().getId(),
-                        enrollment.getUser().getName(),
-                        enrollment.getUser().getEmail(),
-                        enrollment.getSection().getCourse().getCourseId(),
-                        enrollment.getSection().getSecId(),
-                        enrollment.getSection().getSectionNo(),
-                        enrollment.getSection().getBuilding(),
-                        enrollment.getSection().getRoom(),
-                        enrollment.getSection().getTimes(),
-                        enrollment.getSection().getCourse().getCredits(),
-                        enrollment.getSection().getTerm().getYear(),
-                        enrollment.getSection().getTerm().getSemester()))
-                .collect(Collectors.toList());
+        return enrollments.stream().map(EnrollmentDTO::fromEntity).collect(Collectors.toList());
     }
 
     // instructor uploads enrollments with the final grades for the section
