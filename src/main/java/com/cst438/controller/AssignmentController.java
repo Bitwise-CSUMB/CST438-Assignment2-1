@@ -89,7 +89,9 @@ public class AssignmentController {
     // return updated AssignmentDTO
     @PutMapping("/assignments")
     public AssignmentDTO updateAssignment(@RequestBody AssignmentDTO assignmentDTO) {
-
+        if (assignmentDTO.title().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Assignment title not entered");
+        }
         Assignment a = assignmentRepository.findById(assignmentDTO.id()).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found for ID: " + assignmentDTO.id()));
         return getAssignmentDTO(assignmentDTO, a);
