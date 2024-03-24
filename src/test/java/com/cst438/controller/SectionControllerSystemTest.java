@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SectionControllerSystemTest {
 
     // TODO edit the following to give the location and file name
-    // of the Chrome driver.
+    //  of the Chrome driver.
     //  for WinOS the file name will be chromedriver.exe
     //  for MacOS the file name will be chromedriver
     public static final String CHROME_DRIVER_FILE_LOCATION =
@@ -29,8 +29,13 @@ public class SectionControllerSystemTest {
 
     // add selenium dependency to pom.xml
 
-    // these tests assumes that test data does NOT contain any
+    // these tests assume that test data does NOT contain any
     // sections for course cst499 in 2024 Spring term.
+
+    // there is also the assumption that the test data does NOT contain
+    // an assignment with title "Test Assignment 1"
+    // and dueDate "2024-03-01"
+    // for courseId "cst363"
 
     WebDriver driver;
 
@@ -263,5 +268,75 @@ public class SectionControllerSystemTest {
        // verify that Section list is empty
        assertThrows(NoSuchElementException.class, () ->
                driver.findElement(By.xpath("//tr[td='cst499']")));
+    }
+
+    // TODO: Instructor adds a new assignment successfully
+    @Test
+    public void systemTestAddAssignment() throws Exception {
+      // add an assignment for cst363 Spring 2024 term
+      // verify assignment shows on the list of assignments for cst363 Spring 2024
+      // delete the assignment
+      // verify the assignment is gone
+
+
+      // enter 2024, Spring and click show sections
+      driver.findElement(By.id("year")).sendKeys("2024");
+      driver.findElement(By.id("semester")).sendKeys("Spring");
+      WebElement we = driver.findElement(By.id("sections"));
+      we.click();
+      Thread.sleep(SLEEP_DURATION);
+
+      // verify that cst363 is in the list of sections
+      // if it exists, view assignments
+      // Selenium throws NoSuchElementException when the element is not found
+      try {
+        while (true) {
+          WebElement row363 = driver.findElement(By.xpath("//tr[td='cst363']"));
+          List<WebElement> links = row363.findElements(By.tagName("a"));
+          // "Assignments" is the second link
+          assertEquals(2, links.size());
+          links.get(1).click(); // clicking on "Assignments" link
+          Thread.sleep(SLEEP_DURATION);
+        }
+      } catch (NoSuchElementException e) {
+        // do nothing, continue with test
+      }
+
+      // find and click button to add an assignment
+      driver.findElement(By.id("addAssignment")).click();
+      Thread.sleep(SLEEP_DURATION);
+
+      // enter data
+      //  title: Test Assignment 1,
+      driver.findElement(By.id("etitle")).sendKeys("Test Assignment 1");
+      //  dueDate: 2024-03-01,
+      driver.findElement(By.id("eduedate")).sendKeys("2024-03-01");
+      // click Save
+      driver.findElement(By.id("save")).click();
+      Thread.sleep(SLEEP_DURATION);
+
+      String message = driver.findElement(By.id("message")).getText();
+      assertTrue(message.startsWith("assignment added"));
+
+      // verify that new Assignment shows up on Assignments list
+      // find the row for Test Assignment 1
+      WebElement rowTest = driver.findElement(By.xpath("//tr[td='Test Assignment 1']"));
+      List<WebElement> buttons = rowTest.findElements(By.tagName("button"));
+      // delete is the third button
+      assertEquals(3, buttons.size());
+      buttons.get(2).click();
+      Thread.sleep(SLEEP_DURATION);
+      // find the YES to confirm button
+      List<WebElement> confirmButtons = driver
+          .findElement(By.className("react-confirm-alert-button-group"))
+          .findElements(By.tagName("button"));
+      assertEquals(2, confirmButtons.size());
+      confirmButtons.get(0).click();
+      Thread.sleep(SLEEP_DURATION);
+
+      // verify that Assignment list is now empty
+      assertThrows(NoSuchElementException.class, () ->
+          driver.findElement(By.xpath("//tr[td='Test Assignment 1']")));
+
     }
 }
