@@ -1,21 +1,28 @@
 package com.cst438.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 import java.sql.Date;
-import java.util.List;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Entity
 public class Assignment {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name = "assignment_id")
     private int assignmentId;
 
     // add additional attributes for title, dueDate
     private String title;
+
     @Column(name = "due_date")
     private Date dueDate;
 
