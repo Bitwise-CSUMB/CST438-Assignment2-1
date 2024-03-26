@@ -1,3 +1,8 @@
+// Authored by Jake and Jeremiah
+// Covers Unit Tests #1, #2 and #3
+// Instructor adds a new assignment successfully
+// Instructor adds a new assignment with a due date past the end date of the class
+// Adding new assignment with invalid section number
 
 package com.cst438.controller;
 

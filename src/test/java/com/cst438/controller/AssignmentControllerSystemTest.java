@@ -1,3 +1,7 @@
+// Authored by Jeremiah
+// Covers System Test #1
+// Instructor adds a new assignment successfully
+
 package com.cst438.controller;
 
 import org.junit.jupiter.api.AfterEach;
@@ -28,9 +32,6 @@ public class AssignmentControllerSystemTest {
 
 
   // add selenium dependency to pom.xml
-
-  // these tests assume that test data does NOT contain any
-  // sections for course cst499 in 2024 Spring term.
 
   // there is also the assumption that the test data does NOT contain
   // an assignment with title "Test Assignment 1"
@@ -67,7 +68,7 @@ public class AssignmentControllerSystemTest {
     }
   }
 
-  // TODO: Instructor adds a new assignment successfully
+  // Instructor adds a new assignment successfully
   @Test
   public void systemTestAddAssignment() throws Exception {
     // add an assignment for cst363 Spring 2024 term
@@ -79,7 +80,7 @@ public class AssignmentControllerSystemTest {
     // enter 2024, Spring and click show sections
     driver.findElement(By.id("year")).sendKeys("2024");
     driver.findElement(By.id("semester")).sendKeys("Spring");
-    WebElement we = driver.findElement(By.id("sections"));
+    WebElement we = driver.findElement(By.id("sectionslink"));
     we.click();
     Thread.sleep(SLEEP_DURATION);
 
@@ -88,7 +89,7 @@ public class AssignmentControllerSystemTest {
     // Selenium throws NoSuchElementException when the element is not found
     try {
       while (true) {
-        WebElement row363 = driver.findElement(By.xpath("//tr[td='cst363']"));
+        WebElement row363 = driver.findElement(By.xpath("//tr[td='M W 2:00-3:50']"));
         List<WebElement> links = row363.findElements(By.tagName("a"));
         // "Assignments" is the second link
         assertEquals(2, links.size());
