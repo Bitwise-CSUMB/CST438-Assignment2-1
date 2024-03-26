@@ -7,6 +7,11 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestUtils {
 
@@ -43,5 +48,11 @@ public class TestUtils {
 
 	public static Date getSqlDate(LocalDateTime dateTime) {
 		return Date.valueOf(dateTime.toLocalDate());
+	}
+
+	public static <T> T updateEntity(Function<Integer, Optional<T>> findFunc, Supplier<Integer> idSupplier) {
+		Optional<T> updated = findFunc.apply(idSupplier.get());
+		assertTrue(updated.isPresent());
+		return updated.get();
 	}
 }
