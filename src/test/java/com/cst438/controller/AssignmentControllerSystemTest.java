@@ -4,17 +4,25 @@
 
 package com.cst438.controller;
 
+import com.cst438.test.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class AssignmentControllerSystemTest {
 
   // TODO edit the following to give the location and file name
@@ -76,6 +84,7 @@ public class AssignmentControllerSystemTest {
     // delete the assignment
     // verify the assignment is gone
 
+    TestUtils.assertInstructorHome(driver);
 
     // enter 2024, Spring and click show sections
     driver.findElement(By.id("year")).sendKeys("2024");

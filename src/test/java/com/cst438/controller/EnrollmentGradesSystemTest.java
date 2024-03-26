@@ -1,14 +1,21 @@
 package com.cst438.controller;
 
+import com.cst438.test.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class EnrollmentGradesSystemTest {
 
     // TODO edit the following to give the location and file name
@@ -62,15 +69,15 @@ public class EnrollmentGradesSystemTest {
 
     @Test
     public void systemTestGradeAssignment() throws Exception {
-        // Verify the app.js is set to INSTRUCTOR.
-        try {
-            driver.findElement(By.id("year")).sendKeys("2024");
-            driver.findElement(By.id("semester")).sendKeys("Spring");
-            driver.findElement(By.id("search")).click();
-            Thread.sleep(SLEEP_DURATION);
-        } catch (NoSuchElementException e) {
-            throw new Exception("Home page is not set to 'INSTRUCTOR'");
-        }
+
+        // Verify that App.js is set to INSTRUCTOR.
+        TestUtils.assertInstructorHome(driver);
+
+        driver.findElement(By.id("year")).sendKeys("2024");
+        driver.findElement(By.id("semester")).sendKeys("Spring");
+        driver.findElement(By.id("sectionslink")).click();
+        Thread.sleep(SLEEP_DURATION);
+
         driver.findElement(By.xpath("(//a)[2]")).click();
         Thread.sleep(SLEEP_DURATION);
 
@@ -82,7 +89,7 @@ public class EnrollmentGradesSystemTest {
         String newGrade;
         if (gradeWe.getAttribute("value") == "F")
             newGrade = "A";
-        else 
+        else
             newGrade = "F";
         gradeWe.sendKeys(newGrade);
         Thread.sleep(SLEEP_DURATION);
@@ -90,7 +97,7 @@ public class EnrollmentGradesSystemTest {
         assertNotEquals(oldGrade, gradeWe.getAttribute("value"));
         assertEquals(newGrade, gradeWe.getAttribute("value"));
 
-        driver.findElement(By.id("saveBtn")).click();
+        driver.findElement(By.id("saveChanges")).click();
         Thread.sleep(SLEEP_DURATION);
 
         // Verifying the grade was successfully saved
@@ -102,7 +109,7 @@ public class EnrollmentGradesSystemTest {
 
         driver.findElement(By.id("year")).sendKeys("2024");
         driver.findElement(By.id("semester")).sendKeys("Spring");
-        driver.findElement(By.id("search")).click();
+        driver.findElement(By.id("sectionslink")).click();
         Thread.sleep(SLEEP_DURATION);
 
         driver.findElement(By.xpath("(//a)[2]")).click();
@@ -110,14 +117,14 @@ public class EnrollmentGradesSystemTest {
 
         gradeWe = driver.findElement(By.xpath("//tr/td[5]/div/div/input"));
         Thread.sleep(SLEEP_DURATION);
-        
+
         assertNotEquals(oldGrade, gradeWe.getAttribute("value"));
         assertEquals(newGrade, gradeWe.getAttribute("value"));
 
         gradeWe.sendKeys(Keys.BACK_SPACE);
         gradeWe.sendKeys(oldGrade);
 
-        driver.findElement(By.id("saveBtn")).click();
+        driver.findElement(By.id("saveChanges")).click();
 
         driver.findElement(By.id("home")).click();
     }

@@ -199,6 +199,8 @@ public class EnrollmentControllerSystemTest {
     @Test
     public void systemTestGradeEnrollment() throws Exception {
 
+        TestUtils.assertInstructorHome(driver);
+
         // Enter test year, "Spring", and click "Show Sections"
         driver.findElement(By.id("year")).sendKeys(String.valueOf(testStart.getYear()));
         driver.findElement(By.id("semester")).sendKeys("Spring");
