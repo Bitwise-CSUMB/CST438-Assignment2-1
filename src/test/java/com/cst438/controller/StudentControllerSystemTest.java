@@ -1,3 +1,7 @@
+// Authored by Chris
+// Covers System Test #2
+// Instructor grades an assignment and enters scores for all enrolled students and uploads the scores.
+
 package com.cst438.controller;
 
 import com.cst438.domain.AssignmentRepository;

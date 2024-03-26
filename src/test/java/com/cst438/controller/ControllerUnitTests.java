@@ -1,3 +1,8 @@
+// Authored by Chris
+// Covers Unit tests #4 and #5
+// 4. Instructor grades an assignment and enters scores for all enrolled students and uploads the scores.
+// 5. Instructor attempts to grade an assignment but the assignment id is invalid.
+
 package com.cst438.controller;
 
 import com.cst438.domain.*;
@@ -13,10 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-/*
- * Unit tests for 4 and 5
- */
 
 @AutoConfigureMockMvc
 @SpringBootTest
