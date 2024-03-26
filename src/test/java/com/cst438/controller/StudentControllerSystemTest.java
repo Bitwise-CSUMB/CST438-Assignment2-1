@@ -87,9 +87,9 @@ public class StudentControllerSystemTest {
         WebElement enrollButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("Enroll")));
         enrollButton.click();
 
-        // Get section number of enrolled course
-        WebElement sectionNumberElement = driver.findElement(By.xpath("//td[@id='sectionNo']")); // Assuming section number is in a <td> element with id 'sectionNo'
-        String sectionNumber = sectionNumberElement.getText(); // Extract section number text
+        // Get the selectedCourseSecNo
+        WebElement selectedRow = enrollButton.findElement(By.xpath("./ancestor::tr"));
+        String sectionNumber = selectedRow.findElement(By.xpath("./td[2]")).getText();
 
         // Wait until the Confirm button is clickable
         WebElement confirmButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("Confirm")));
@@ -98,6 +98,10 @@ public class StudentControllerSystemTest {
         // Click link to navigate to View Schedule page
         WebElement scheduleLink = driver.findElement(By.id("schedule"));
         scheduleLink.click();
+        driver.findElement(By.id("year")).sendKeys("2024");
+        driver.findElement(By.id("semester")).sendKeys("Spring");
+        WebElement queryButton = driver.findElement(By.id("query"));
+        queryButton.click();
         WebElement scheduleTable = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("Center")));
 
         // Verify that new section shows up on schedule table
