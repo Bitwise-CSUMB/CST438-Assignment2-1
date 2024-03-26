@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @AutoConfigureMockMvc
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT, properties="spring.h2.console.enabled=true")
+@SpringBootTest
 public class EnrollmentControllerUnitTests {
 
     @Autowired
@@ -83,9 +83,9 @@ public class EnrollmentControllerUnitTests {
 
         // Add test Course to the db
         testCourse = courseRepository.save(new Course(
-            "cst999",
-            "General AI Systems",
-            5
+            "cst999",             // String courseId
+            "General AI Systems", // String title
+            5                     // int credits
         ));
 
         // Add test Term to the db
@@ -233,7 +233,7 @@ public class EnrollmentControllerUnitTests {
         testEnrollment2 = updateEntity(enrollmentRepository::findById, testEnrollment2::getEnrollmentId);
 
         // Check that the grades were really updated
-        assertEquals(testEnrollment1.getGrade(), "A");
-        assertEquals(testEnrollment2.getGrade(), "A");
+        assertEquals("A", testEnrollment1.getGrade());
+        assertEquals("A", testEnrollment2.getGrade());
     }
 }

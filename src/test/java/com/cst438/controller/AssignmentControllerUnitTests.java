@@ -60,9 +60,9 @@ public class AssignmentControllerUnitTests {
 
         // Add test Course to the db
         testCourse = courseRepository.save(new Course(
-            "cst999",
-            "General AI Systems",
-            5
+            "cst999",             // String courseId
+            "General AI Systems", // String title
+            5                     // int credits
         ));
 
         // Add test Term to the db
