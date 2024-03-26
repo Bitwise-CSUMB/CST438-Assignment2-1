@@ -1,8 +1,9 @@
+
 // Authored by Jake and Jeremiah
 // Covers Unit Tests #1, #2 and #3
-// Instructor adds a new assignment successfully
-// Instructor adds a new assignment with a due date past the end date of the class
-// Adding new assignment with invalid section number
+// 1. Instructor adds a new assignment successfully
+// 2. Instructor adds a new assignment with a due date past the end date of the class
+// 3. Instructor adds a new assignment with an invalid section number
 
 package com.cst438.controller;
 
@@ -125,7 +126,8 @@ public class AssignmentControllerUnitTests {
         courseRepository.delete(testCourse);
     }
 
-    // Unit Test 1 - AssignmentController::createAssignment() - Instructor adds a new assignment successfully
+    // Unit Test #1 - Instructor adds a new assignment successfully
+    //   AssignmentController::createAssignment()
     @Test
     public void addAssignment() throws Exception {
         MockHttpServletResponse response;
@@ -188,7 +190,8 @@ public class AssignmentControllerUnitTests {
         assertNull(a);  // assignment should not be found after delete
     }
 
-    // Unit Test 2 - AssignmentController::createAssignment() - Instructor adds a new assignment with a due date past the end date of the class
+    // Unit Test #2 - Instructor adds a new assignment with a due date past the end date of the class
+    //   AssignmentController::createAssignment()
     @Test
     public void addAssignmentBadDueDate() throws Exception {
         MockHttpServletResponse response;
@@ -222,7 +225,8 @@ public class AssignmentControllerUnitTests {
 
     }
 
-    // Unit Test 3 - AssignmentController::createAssignment() - Adding new assignment with invalid section number
+    // Unit Test #3 - Instructor adds a new assignment with an invalid section number
+    //   AssignmentController::createAssignment()
     @Test
     @Tag("Dummy-Data")
     public void addAssignmentInvalidSectionNumber() throws Exception {

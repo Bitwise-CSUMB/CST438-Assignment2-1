@@ -1,4 +1,8 @@
 
+// Authored by Jake
+// Covers Unit Test #10
+// 10. Instructor enters final grades for all enrollments in a section
+
 package com.cst438.controller;
 
 import com.cst438.domain.Course;
@@ -179,7 +183,8 @@ public class EnrollmentControllerUnitTests {
         );
     }
 
-    // Unit Test 10 - EnrollmentController::getEnrollments() and EnrollmentController::updateEnrollmentGrade()
+    // Unit Test #10 - Instructor enters final grades for all enrollments in a section
+    //   EnrollmentController::getEnrollments() and EnrollmentController::updateEnrollmentGrade()
     @Test
     public void unitTestGetAndUpdateEnrollmentGrades() throws Exception {
 

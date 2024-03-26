@@ -1,6 +1,7 @@
-// Authored by Chris
-// Covers System Test #2
-// Instructor grades an assignment and enters scores for all enrolled students and uploads the scores.
+
+// Authored by Andi
+// Covers System Test #3
+// 3. Student enrolls into a section
 
 package com.cst438.controller;
 
@@ -73,7 +74,7 @@ public class StudentControllerSystemTest {
         }
     }
 
-    // student enrolls into a section
+    // System Test #3 - Student enrolls into a section
     @Test
     public void systemTestAddCourse() throws Exception {
 

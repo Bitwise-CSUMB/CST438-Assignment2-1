@@ -1,4 +1,8 @@
 
+// Authored by Jake
+// Covers System Test #4
+// 4. Instructor enters final grades for all enrollments in a section
+
 package com.cst438.controller;
 
 import com.cst438.domain.Course;
@@ -196,6 +200,7 @@ public class EnrollmentControllerSystemTest {
         courseRepository.delete(testCourse);
     }
 
+    // System Test #4 - Instructor enters final grades for all enrollments in a section
     @Test
     public void systemTestGradeEnrollment() throws Exception {
 

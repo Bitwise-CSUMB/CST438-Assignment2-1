@@ -1,3 +1,8 @@
+
+// Authored by Chris
+// Covers System Test #2
+// 2. Instructor grades an assignment, enters scores for all enrolled students, and uploads the scores
+
 package com.cst438.controller;
 
 import com.cst438.test.utils.TestUtils;
@@ -67,6 +72,7 @@ public class EnrollmentGradesSystemTest {
         }
     }
 
+    // System Test #2 - Instructor grades an assignment, enters scores for all enrolled students, and uploads the scores
     @Test
     public void systemTestGradeAssignment() throws Exception {
 

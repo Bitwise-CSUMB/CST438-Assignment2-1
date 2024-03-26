@@ -1,6 +1,7 @@
+
 // Authored by Jeremiah
 // Covers System Test #1
-// Instructor adds a new assignment successfully
+// 1. Instructor adds a new assignment successfully
 
 package com.cst438.controller;
 
@@ -76,7 +77,7 @@ public class AssignmentControllerSystemTest {
     }
   }
 
-  // Instructor adds a new assignment successfully
+  // System Test #1 - Instructor adds a new assignment successfully
   @Test
   public void systemTestAddAssignment() throws Exception {
     // add an assignment for cst363 Spring 2024 term

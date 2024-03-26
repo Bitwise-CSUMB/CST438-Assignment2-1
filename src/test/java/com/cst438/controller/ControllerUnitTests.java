@@ -1,7 +1,8 @@
+
 // Authored by Chris
-// Covers Unit tests #4 and #5
-// 4. Instructor grades an assignment and enters scores for all enrolled students and uploads the scores.
-// 5. Instructor attempts to grade an assignment but the assignment id is invalid.
+// Covers Unit Tests #4 and #5
+// 4. Instructor grades an assignment, enters scores for all enrolled students, and uploads the scores
+// 5. Instructor attempts to grade an assignment but the assignment id is invalid
 
 package com.cst438.controller;
 
@@ -38,8 +39,7 @@ public class ControllerUnitTests {
     @Autowired
     EnrollmentController enrollmentController;
 
-    // Unit test to grade assignment
-    // Unit Test 4.
+    // Unit Test #4 - Instructor grades an assignment, enters scores for all enrolled students, and uploads the scores
     @Test
     public void gradeAssignment() throws Exception {
         MockHttpServletResponse response;
@@ -116,8 +116,7 @@ public class ControllerUnitTests {
         assertEquals(200, response.getStatus());
     }
 
-    // Unit test to grade invalid assignment.
-    // Unit Test 5.
+    // Unit Test #5 - Instructor attempts to grade an assignment but the assignment id is invalid
     @Test
     public void gradeInvalidAssignment() throws Exception {
         MockHttpServletResponse response;

@@ -1,3 +1,11 @@
+
+// Authored by Andi
+// Covers Unit Tests #6, #7, #8, and #9
+// 6. Student enrolls into a section
+// 7. Student enrolls into a section, but fails because the student is already enrolled
+// 8. Student enrolls into a section, but the section number is invalid
+// 9. Student enrolls into a section, but it is past the add deadline
+
 package com.cst438.controller;
 
 import com.cst438.domain.*;
@@ -33,7 +41,7 @@ public class StudentControllerUnitTest {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
-    // student enrolls into a section
+    // Unit Test #6 - Student enrolls into a section
     @Test
     void addEnrollment() throws Exception {
 
@@ -65,7 +73,7 @@ public class StudentControllerUnitTest {
         assertNull(enrollmentRepository.findById(result.enrollmentId()).orElse(null));
     }
 
-    // student enrolls into a section, but fails because the student is already enrolled
+    // Unit Test #7 - Student enrolls into a section, but fails because the student is already enrolled
     @Test
     public void addSectionFailsAlreadyEnrolled( ) throws Exception {
 
@@ -92,7 +100,7 @@ public class StudentControllerUnitTest {
         assertEquals("studentId is already enrolled in sectionNo", message);
     }
 
-    // student enrolls into a section, but the section number is invalid
+    // Unit Test #8 - Student enrolls into a section, but the section number is invalid
     @Test
     public void addSectionFailsBadSecNo( ) throws Exception {
 
@@ -120,7 +128,7 @@ public class StudentControllerUnitTest {
 
     }
 
-    // student enrolls into a section, but it is past the add deadline
+    // Unit Test #9 - Student enrolls into a section, but it is past the add deadline
     @Test
     public void addSectionFailsDeadline( ) throws Exception {
 
