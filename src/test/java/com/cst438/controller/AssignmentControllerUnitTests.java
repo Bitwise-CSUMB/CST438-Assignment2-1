@@ -18,7 +18,9 @@ import com.cst438.dto.AssignmentDTO;
 import com.cst438.test.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,6 +48,9 @@ public class AssignmentControllerUnitTests {
     private MockMvc mvc;
 
     @Autowired
+    private AssignmentRepository assignmentRepository;
+
+    @Autowired
     private CourseRepository courseRepository;
 
     @Autowired
@@ -53,9 +58,6 @@ public class AssignmentControllerUnitTests {
 
     @Autowired
     private TermRepository termRepository;
-
-    @Autowired
-    AssignmentRepository assignmentRepository;
 
     private LocalDateTime testStart;
 
@@ -66,7 +68,11 @@ public class AssignmentControllerUnitTests {
     private Section testSection;
 
     @BeforeEach
-    public void addDummyObjectsToDB() {
+    public void addDummyObjectsToDB(TestInfo testInfo) {
+
+        if (!testInfo.getTags().contains("Dummy-Data")) {
+            return;
+        }
 
         testStart = TestUtils.getNow();
 
@@ -108,7 +114,12 @@ public class AssignmentControllerUnitTests {
     }
 
     @AfterEach
-    public void removeDummyObjectsFromDB() {
+    public void removeDummyObjectsFromDB(TestInfo testInfo) {
+
+        if (!testInfo.getTags().contains("Dummy-Data")) {
+            return;
+        }
+
         sectionRepository.delete(testSection);
         termRepository.delete(testTerm);
         courseRepository.delete(testCourse);
@@ -213,6 +224,7 @@ public class AssignmentControllerUnitTests {
 
     // Unit Test 3 - AssignmentController::createAssignment() - Adding new assignment with invalid section number
     @Test
+    @Tag("Dummy-Data")
     public void addAssignmentInvalidSectionNumber() throws Exception {
 
         final int invalidSecNo = -1;
