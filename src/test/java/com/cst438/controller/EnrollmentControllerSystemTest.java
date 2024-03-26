@@ -11,33 +11,40 @@ import com.cst438.domain.Term;
 import com.cst438.domain.TermRepository;
 import com.cst438.domain.User;
 import com.cst438.domain.UserRepository;
-import com.cst438.dto.EnrollmentDTO;
 import com.cst438.test.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@AutoConfigureMockMvc
-@SpringBootTest
-public class EnrollmentControllerUnitTests {
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT)
+public class EnrollmentControllerSystemTest {
 
-    @Autowired
-    private MockMvc mvc;
+    // TODO edit the following to give the location and file name
+    //  of the Chrome driver.
+    //  for WinOS the file name will be chromedriver.exe
+    //  for MacOS the file name will be chromedriver
+    private static final String CHROME_DRIVER_FILE_LOCATION =
+        "C:/chromedriver-win64/chromedriver.exe";
+
+    private static final String URL = "http://localhost:3000";
+
+    private static final int SLEEP_DURATION = 1000; // 1 second
+
+    private WebDriver driver;
 
     @Autowired
     private CourseRepository courseRepository;
@@ -70,8 +77,32 @@ public class EnrollmentControllerUnitTests {
 
     private Enrollment testEnrollment2;
 
+    private void setUpDriver() throws Exception {
+
+        // Set properties required by Chrome Driver
+        System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+        ChromeOptions ops = new ChromeOptions();
+        ops.addArguments("--remote-allow-origins=*");
+
+        // Start the driver
+        driver = new ChromeDriver(ops);
+        driver.get(URL);
+
+        // Must have a short wait to allow time for the page to download
+        Thread.sleep(SLEEP_DURATION);
+    }
+
+    private void terminateDriver() {
+        if (driver != null) {
+            // Quit the driver
+            driver.close();
+            driver.quit();
+            driver = null;
+        }
+    }
+
     @BeforeEach
-    public void addDummyObjectsToDB() {
+    public void beforeEach() throws Exception {
 
         testStart = TestUtils.getNow();
 
@@ -146,10 +177,16 @@ public class EnrollmentControllerUnitTests {
             testSection,      // Section section
             new ArrayList<>() // List<Grade> grades
         ));
+
+        // launch driver
+        setUpDriver();
     }
 
     @AfterEach
-    public void removeDummyObjectsFromDB() {
+    public void afterEach() {
+
+        terminateDriver();
+
         enrollmentRepository.delete(testEnrollment2);
         userRepository.delete(testUser2);
         enrollmentRepository.delete(testEnrollment1);
@@ -159,65 +196,36 @@ public class EnrollmentControllerUnitTests {
         courseRepository.delete(testCourse);
     }
 
-    private static EnrollmentDTO changeGrade(EnrollmentDTO enrollment, String newGrade) {
-        return new EnrollmentDTO(
-            enrollment.enrollmentId(),
-            newGrade,
-            enrollment.studentId(),
-            enrollment.name(),
-            enrollment.email(),
-            enrollment.courseId(),
-            enrollment.courseTitle(),
-            enrollment.sectionId(),
-            enrollment.sectionNo(),
-            enrollment.building(),
-            enrollment.room(),
-            enrollment.times(),
-            enrollment.credits(),
-            enrollment.year(),
-            enrollment.semester()
-        );
-    }
-
-    // Unit Test 10 - EnrollmentController::getEnrollments() and EnrollmentController::updateEnrollmentGrade()
     @Test
-    public void unitTestGetAndUpdateEnrollmentGrades() throws Exception {
+    public void systemTestGradeEnrollment() throws Exception {
 
-        // Get enrollments using REST API
-        MockHttpServletResponse response = mvc.perform(
-            MockMvcRequestBuilders
-                .get(String.format("/sections/%s/enrollments", testSection.getSectionNo()))
-                .accept(MediaType.APPLICATION_JSON)
-        ).andReturn().getResponse();
+        // Enter test year, "Spring", and click "Show Sections"
+        driver.findElement(By.id("year")).sendKeys(String.valueOf(testStart.getYear()));
+        driver.findElement(By.id("semester")).sendKeys("Spring");
+        driver.findElement(By.id("sectionslink")).click();
+        Thread.sleep(SLEEP_DURATION);
 
-        // Check that the status code + message are as expected
-        assertEquals(200, response.getStatus());
-        assertNull(response.getErrorMessage());
+        // Find cst999 row
+        final WebElement testCourseRow = driver.findElement(By.xpath(String.format(
+            "//tr/td[text()='%s']/..", testCourse.getCourseId())));
 
-        // Convert response to EnrollmentDTO list
-        List<EnrollmentDTO> enrollments = TestUtils.fromJsonListString(
-            response.getContentAsString(), EnrollmentDTO.class);
+        // Find cst999 row's "Enrollments" link
+        final WebElement enrollmentLink = testCourseRow.findElement(By.xpath("td/a[text()='Enrollments']"));
 
-        // Update grades locally
+        // Click "Enrollments"
+        enrollmentLink.click();
+        Thread.sleep(SLEEP_DURATION);
 
-        List<EnrollmentDTO> newEnrollments = new ArrayList<>();
-
-        for (EnrollmentDTO enrollment : enrollments) {
-            newEnrollments.add(changeGrade(enrollment, "A"));
+        // Set grades
+        final List<WebElement> gradeFields = driver.findElements(By.name("grade"));
+        for (WebElement gradeField : gradeFields) {
+            gradeField.clear();
+            gradeField.sendKeys("A");
         }
 
-        // Update the enrollments using the REST API
-        response = mvc.perform(
-            MockMvcRequestBuilders
-                .put("/enrollments")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(newEnrollments))
-        ).andReturn().getResponse();
-
-        // Check that the status code + message are as expected
-        assertEquals(200, response.getStatus());
-        assertNull(response.getErrorMessage());
+        // Click "Save Changes"
+        driver.findElement(By.id("saveChanges")).click();
+        Thread.sleep(SLEEP_DURATION);
 
         // Re-fetch testEnrollment1 and testEnrollment2 from the database
         testEnrollment1 = TestUtils.updateEntity(enrollmentRepository::findById, testEnrollment1::getEnrollmentId);
