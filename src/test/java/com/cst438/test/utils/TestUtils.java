@@ -6,6 +6,7 @@ import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 public class TestUtils {
 
@@ -21,6 +22,15 @@ public class TestUtils {
 	public static <T> T fromJsonString(String str, Class<T> valueType) {
 		try {
 			return new ObjectMapper().readValue(str, valueType);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static <T> List<T> fromJsonListString(String str, Class<T> valueType) {
+		try {
+			return new ObjectMapper().readerForListOf(valueType).readValue(str);
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);

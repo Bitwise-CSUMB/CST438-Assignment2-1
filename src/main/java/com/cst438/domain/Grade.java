@@ -29,6 +29,15 @@ public class Grade {
     @JoinColumn(name = "enrollment_id", nullable = false)
     private Enrollment enrollment;
 
+    public Grade() {}
+
+    public Grade(int gradeId, Integer score, Assignment assignment, Enrollment enrollment) {
+        this.gradeId = gradeId;
+        this.score = score;
+        this.assignment = assignment;
+        this.enrollment = enrollment;
+    }
+
     // add getter/setter methods
     public int getGradeId() {
         return this.gradeId;

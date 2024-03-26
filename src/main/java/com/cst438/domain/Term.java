@@ -36,6 +36,22 @@ public class Term {
     @Column(name="end_date")
     private Date endDate;
 
+    public Term() {}
+
+    public Term(
+        int termId, int year, String semester, Date addDate, Date addDeadline,
+        Date dropDeadline, Date startDate, Date endDate)
+    {
+        this.termId = termId;
+        this.year = year;
+        this.semester = semester;
+        this.addDate = addDate;
+        this.addDeadline = addDeadline;
+        this.dropDeadline = dropDeadline;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
     public int getTermId() {
         return termId;
     }

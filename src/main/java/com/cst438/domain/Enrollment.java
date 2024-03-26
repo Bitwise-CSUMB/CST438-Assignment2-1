@@ -37,6 +37,16 @@ public class Enrollment {
     @OneToMany(mappedBy = "enrollment", cascade = CascadeType.REMOVE)
     List<Grade> grades;
 
+    public Enrollment() {}
+
+    public Enrollment(int enrollmentId, String grade, User user, Section section, List<Grade> grades) {
+        this.enrollmentId = enrollmentId;
+        this.grade = grade;
+        this.user = user;
+        this.section = section;
+        this.grades = grades;
+    }
+
     // add getter/setter methods
     public int getEnrollmentId() {
         return this.enrollmentId;
