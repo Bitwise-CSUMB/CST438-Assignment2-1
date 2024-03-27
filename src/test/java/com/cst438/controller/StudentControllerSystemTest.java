@@ -5,8 +5,6 @@
 
 package com.cst438.controller;
 
-import com.cst438.domain.AssignmentRepository;
-import com.cst438.domain.SectionRepository;
 import com.cst438.test.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,28 +15,13 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@AutoConfigureMockMvc
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class StudentControllerSystemTest {
-
-    @Autowired
-    MockMvc mvc;
-
-    @Autowired
-    SectionRepository sectionRepository;
-
-    @Autowired
-    AssignmentRepository assignmentRepository;
 
     private static final String CHROME_DRIVER_FILE_LOCATION = "C:/chromedriver-win64/chromedriver.exe";
     private static final String URL = "http://localhost:3000";

@@ -1,3 +1,5 @@
+// Example system test provided by CST438 course repository, will error if ran.
+
 package com.cst438.controller;
 
 import org.junit.jupiter.api.AfterEach;

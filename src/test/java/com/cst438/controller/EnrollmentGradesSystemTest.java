@@ -7,7 +7,6 @@ package com.cst438.controller;
 
 import com.cst438.test.utils.TestUtils;
 
-import org.hibernate.mapping.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,14 +16,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.ArrayList;
 
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class EnrollmentGradesSystemTest {
 
     // TODO edit the following to give the location and file name

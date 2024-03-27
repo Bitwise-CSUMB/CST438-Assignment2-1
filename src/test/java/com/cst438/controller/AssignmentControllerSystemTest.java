@@ -15,7 +15,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
@@ -23,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class AssignmentControllerSystemTest {
 
   // TODO edit the following to give the location and file name
