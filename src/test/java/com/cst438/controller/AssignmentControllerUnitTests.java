@@ -1,9 +1,11 @@
 
-// Authored by Jake and Jeremiah
-// Covers Unit Tests #1, #2 and #3
+// Authored by Jake, Jeremiah, Chris
+// Covers Unit Tests #1, #2, #3, #4, #5
 // 1. Instructor adds a new assignment successfully
 // 2. Instructor adds a new assignment with a due date past the end date of the class
 // 3. Instructor adds a new assignment with an invalid section number
+// 4. Instructor grades an assignment, enters scores for all enrolled students, and uploads the scores
+// 5. Instructor attempts to grade an assignment but the assignment id is invalid
 
 package com.cst438.controller;
 
@@ -11,11 +13,14 @@ import com.cst438.domain.Assignment;
 import com.cst438.domain.AssignmentRepository;
 import com.cst438.domain.Course;
 import com.cst438.domain.CourseRepository;
+import com.cst438.domain.Grade;
+import com.cst438.domain.GradeRepository;
 import com.cst438.domain.Section;
 import com.cst438.domain.SectionRepository;
 import com.cst438.domain.Term;
 import com.cst438.domain.TermRepository;
 import com.cst438.dto.AssignmentDTO;
+import com.cst438.dto.GradeDTO;
 import com.cst438.test.utils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +61,9 @@ public class AssignmentControllerUnitTests {
 
     @Autowired
     private SectionRepository sectionRepository;
+
+    @Autowired
+    private GradeRepository gradeRepository;
 
     @Autowired
     private TermRepository termRepository;
@@ -255,5 +263,95 @@ public class AssignmentControllerUnitTests {
         // Check that the status code + message are as expected
         assertEquals(404, response.getStatus());
         assertEquals("Section " + invalidSecNo + " not found", response.getErrorMessage());
+    }
+
+    // Unit Test #4 - Instructor grades an assignment, enters scores for all enrolled students, and uploads the scores
+    @Test
+    public void gradeAssignment() throws Exception {
+        MockHttpServletResponse response;
+
+        response = mvc.perform(
+                        MockMvcRequestBuilders
+                                .get("/assignments/1/grades")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andReturn()
+                        .getResponse();
+
+        assertEquals(200, response.getStatus());
+
+        GradeDTO[] result = fromJsonString(response.getContentAsString(), GradeDTO[].class);
+        int numDTOs = result.length;
+
+        // List of grades grabbed from database shouldn't be empty.
+        assertNotEquals(0, numDTOs);
+
+        /*
+         * Pulling old scores, altering them, and saving a new list of GradeDTOs.
+         */
+        Integer[] oldScores = new Integer[numDTOs];
+        Integer[] newScores = new Integer[numDTOs];
+        GradeDTO[] newDTOs = new GradeDTO[numDTOs];
+        for (int i = 0; i < numDTOs; i++) {
+            GradeDTO target = result[0];
+            oldScores[i] = target.score();
+
+            newScores[i] = (oldScores[i] == 55) ? 25 : 55;
+            newDTOs[i] = new GradeDTO(target.gradeId(), target.studentName(), target.studentEmail(), target.assignmentTitle(), target.courseId(), target.sectionId(), newScores[i]);
+        }
+
+        // Confirming that all scores were altered successfully.
+        for (int i = 0; i < numDTOs; i++) {
+            assertNotEquals(newScores[i], oldScores[i]);
+            assertNotEquals(oldScores[i], newDTOs[i].score());
+            assertEquals(newScores[i], newDTOs[i].score());
+        }
+
+        // Saving all altered GradeDTOs.
+        response = mvc.perform(
+                        MockMvcRequestBuilders
+                                .put("/grades")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(asJsonString(newDTOs)))
+                        .andReturn()
+                        .getResponse();
+        
+        assertEquals(200, response.getStatus());
+
+        // Confirming that all DTOs were saved successfully.
+        for (int i = 0; i < numDTOs; i++) {
+            Grade g = gradeRepository.findById(newDTOs[i].gradeId()).orElse(null);
+            assertEquals(g.getScore(), newScores[i]);
+        }
+
+        // Revert score changes.
+        response = mvc.perform(
+                        MockMvcRequestBuilders
+                                .put("/grades")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(asJsonString(result)))
+                        .andReturn()
+                        .getResponse();
+        
+        assertEquals(200, response.getStatus());
+    }
+
+    // Unit Test #5 - Instructor attempts to grade an assignment but the assignment id is invalid
+    @Test
+    public void gradeInvalidAssignment() throws Exception {
+        MockHttpServletResponse response;
+
+        response = mvc.perform(
+                        MockMvcRequestBuilders
+                                .get("/assignments/55/grades")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON))
+                        .andReturn()
+                        .getResponse();
+
+        assertEquals(404, response.getStatus());
+        assertEquals(response.getErrorMessage(), "Assignment 55 not found");
     }
 }
