@@ -49,18 +49,16 @@ public class EnrollmentGradesSystemTest {
     public void setUpDriver() throws Exception {
 
         // set properties required by Chrome Driver
-        System.setProperty(
-                "webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+        System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
         ChromeOptions ops = new ChromeOptions();
         ops.addArguments("--remote-allow-origins=*");
 
         // start the driver
         driver = new ChromeDriver(ops);
-
         driver.get(URL);
+
         // must have a short wait to allow time for the page to download
         Thread.sleep(SLEEP_DURATION);
-
     }
 
     @AfterEach
@@ -99,13 +97,13 @@ public class EnrollmentGradesSystemTest {
         WebElement gradeTable = driver.findElement(By.id("gradeTable"));
         ArrayList<WebElement> gradeList = new ArrayList<>(gradeTable.findElements(By.name("score")));
 
-        // Replacing all current scores with new temperary scores.
+        // Replacing all current scores with new temporary scores.
         String[] oldScores = new String[gradeList.size()];
         String[] newScores = new String[gradeList.size()];
         for (int i = 0; i < gradeList.size(); i++) {
             WebElement grade = gradeList.get(i);
             oldScores[i] = grade.getAttribute("value");
-            newScores[i] = (oldScores[i] == "55") ? "45" : "55";
+            newScores[i] = oldScores[i].equals("55") ? "45" : "55";
 
             assertNotEquals(newScores[i], oldScores[i]);
             assertEquals(oldScores[i], grade.getAttribute("value"));

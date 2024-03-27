@@ -174,7 +174,7 @@ public class AssignmentControllerUnitTests {
         assertNotEquals(0, result.id());
         // check other fields of the DTO for expected values
         assertEquals("Test Assignment 1", result.title());
-        assertEquals("2024-03-01", result.dueDate().toString());
+        assertEquals("2024-03-01", result.dueDate());
         assertEquals("cst363", result.courseId());
         assertEquals(1, result.secId());
         assertEquals(8, result.secNo());
@@ -230,7 +230,6 @@ public class AssignmentControllerUnitTests {
         // check the expected error message
         String message = response.getErrorMessage();
         assertEquals("Bad due date; section 8 timeframe: 2024-01-15 - 2024-05-17", message);
-
     }
 
     // Unit Test #3 - Instructor adds a new assignment with an invalid section number

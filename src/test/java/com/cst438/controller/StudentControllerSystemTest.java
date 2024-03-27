@@ -33,18 +33,16 @@ public class StudentControllerSystemTest {
     public void setUpDriver() throws Exception {
 
         // set properties required by Chrome Driver
-        System.setProperty(
-                "webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+        System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
         ChromeOptions ops = new ChromeOptions();
         ops.addArguments("--remote-allow-origins=*");
 
         // start the driver
         driver = new ChromeDriver(ops);
-
         driver.get(URL);
+
         // must have a short wait to allow time for the page to download
         Thread.sleep(SLEEP_DURATION);
-
     }
 
     @AfterEach
@@ -59,7 +57,7 @@ public class StudentControllerSystemTest {
 
     // System Test #3 - Student enrolls into a section
     @Test
-    public void systemTestAddCourse() throws Exception {
+    public void systemTestAddCourse() {
 
         TestUtils.assertStudentHome(driver);
 
@@ -68,7 +66,7 @@ public class StudentControllerSystemTest {
         // Click link to navigate to Enroll in Course page
         WebElement addCourse = driver.findElement(By.id("addCourse"));
         addCourse.click();
-        WebElement courseTable = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("Center")));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("Center")));
 
         // Wait until the Enroll button is clickable
         WebElement enrollButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("Enroll")));

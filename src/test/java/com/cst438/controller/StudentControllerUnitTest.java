@@ -10,7 +10,7 @@ package com.cst438.controller;
 
 import com.cst438.domain.*;
 import com.cst438.dto.EnrollmentDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cst438.test.utils.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -59,7 +59,7 @@ public class StudentControllerUnitTest {
 
         // Assert enrollment is successful
         assertEquals(200, response.getStatus());
-        EnrollmentDTO result = fromJsonString(response.getContentAsString(), EnrollmentDTO.class);
+        EnrollmentDTO result = TestUtils.fromJsonString(response.getContentAsString(), EnrollmentDTO.class);
         assertNotEquals(0, result.enrollmentId());
         assertNotNull(enrollmentRepository.findById(result.enrollmentId()).orElse(null));
 
@@ -125,7 +125,6 @@ public class StudentControllerUnitTest {
         // check the expected error message
         String message = response.getErrorMessage();
         assertEquals("Unknown sectionNo", message);
-
     }
 
     // Unit Test #9 - Student enrolls into a section, but it is past the add deadline
@@ -153,14 +152,5 @@ public class StudentControllerUnitTest {
         // check the expected error message
         String message = response.getErrorMessage();
         assertEquals("Course cannot be added at this time", message);
-
-    }
-
-    private static <T> T  fromJsonString(String str, Class<T> valueType ) {
-        try {
-            return new ObjectMapper().readValue(str, valueType);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

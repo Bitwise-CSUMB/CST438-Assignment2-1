@@ -51,18 +51,16 @@ public class AssignmentControllerSystemTest {
   public void setUpDriver() throws Exception {
 
     // set properties required by Chrome Driver
-    System.setProperty(
-        "webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
+    System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
     ChromeOptions ops = new ChromeOptions();
     ops.addArguments("--remote-allow-origins=*");
 
     // start the driver
     driver = new ChromeDriver(ops);
-
     driver.get(URL);
+
     // must have a short wait to allow time for the page to download
     Thread.sleep(SLEEP_DURATION);
-
   }
 
   @AfterEach
@@ -143,7 +141,5 @@ public class AssignmentControllerSystemTest {
     // verify that Assignment list is now empty
     assertThrows(NoSuchElementException.class, () ->
         driver.findElement(By.xpath("//tr[td='Test Assignment 1']")));
-
   }
-
 }
