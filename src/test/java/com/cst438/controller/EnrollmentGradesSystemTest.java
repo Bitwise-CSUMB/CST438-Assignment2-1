@@ -6,6 +6,8 @@
 package com.cst438.controller;
 
 import com.cst438.test.utils.TestUtils;
+
+import org.hibernate.mapping.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import java.util.ArrayList;
 
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class EnrollmentGradesSystemTest {
@@ -79,59 +83,69 @@ public class EnrollmentGradesSystemTest {
         // Verify that App.js is set to INSTRUCTOR.
         TestUtils.assertInstructorHome(driver);
 
+        // Search for the sections in Spring 2024.
         driver.findElement(By.id("year")).sendKeys("2024");
         driver.findElement(By.id("semester")).sendKeys("Spring");
         driver.findElement(By.id("sectionslink")).click();
         Thread.sleep(SLEEP_DURATION);
 
-        driver.findElement(By.xpath("(//a)[2]")).click();
+        // We're selecting the assignments from the first section.
+        driver.findElement(By.xpath("(//a)[3]")).click();
         Thread.sleep(SLEEP_DURATION);
 
-        // Grade the target grades current value, alter it, and confirm.
-        WebElement gradeWe = driver.findElement(By.xpath("//tr/td[5]/div/div/input"));
-        String oldGrade = gradeWe.getAttribute("value");
-
-        gradeWe.sendKeys(Keys.BACK_SPACE);
-        String newGrade;
-        if (gradeWe.getAttribute("value") == "F")
-            newGrade = "A";
-        else
-            newGrade = "F";
-        gradeWe.sendKeys(newGrade);
+        // Grading the first assignment.
+        WebElement assignmentTable = driver.findElement(By.id("assignmentTable"));
+        WebElement viewAssignmentsBtn = assignmentTable.findElement(By.xpath("//tr/td[4]"));
+        viewAssignmentsBtn.click();
         Thread.sleep(SLEEP_DURATION);
 
-        assertNotEquals(oldGrade, gradeWe.getAttribute("value"));
-        assertEquals(newGrade, gradeWe.getAttribute("value"));
+        WebElement gradeTable = driver.findElement(By.id("gradeTable"));
+        ArrayList<WebElement> gradeList = new ArrayList<>(gradeTable.findElements(By.name("score")));
 
-        driver.findElement(By.id("saveChanges")).click();
+        // Replacing all current scores with new temperary scores.
+        String[] oldScores = new String[gradeList.size()];
+        String[] newScores = new String[gradeList.size()];
+        for (int i = 0; i < gradeList.size(); i++) {
+            WebElement grade = gradeList.get(i);
+            oldScores[i] = grade.getAttribute("value");
+            newScores[i] = (oldScores[i] == "55") ? "45" : "55";
+
+            assertNotEquals(newScores[i], oldScores[i]);
+            assertEquals(oldScores[i], grade.getAttribute("value"));
+
+            grade.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+            grade.sendKeys(newScores[i]);
+
+            assertEquals(newScores[i], grade.getAttribute("value"));
+
+            Thread.sleep(SLEEP_DURATION);
+        }
         Thread.sleep(SLEEP_DURATION);
 
-        // Verifying the grade was successfully saved
-        WebElement errorText = driver.findElement(By.className("Error"));
-        assertEquals("Enrollments saved", errorText.getText());
-
-        driver.findElement(By.id("home")).click();
+        driver.findElement(By.id("gradeDialogSave")).click();
         Thread.sleep(SLEEP_DURATION);
 
-        driver.findElement(By.id("year")).sendKeys("2024");
-        driver.findElement(By.id("semester")).sendKeys("Spring");
-        driver.findElement(By.id("sectionslink")).click();
+        viewAssignmentsBtn.click();
         Thread.sleep(SLEEP_DURATION);
 
-        driver.findElement(By.xpath("(//a)[2]")).click();
+        gradeTable = driver.findElement(By.id("gradeTable"));
+        gradeList = new ArrayList<>(gradeTable.findElements(By.name("score")));
+
+        // Verifying the change was saved successfully and reverting it.
+        for (int i = 0; i < gradeList.size(); i++) {
+            WebElement grade = gradeList.get(i);
+
+            assertEquals(newScores[i], grade.getAttribute("value"));
+
+            grade.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+            grade.sendKeys(oldScores[i]);
+
+            assertEquals(oldScores[i], grade.getAttribute("value"));
+
+            Thread.sleep(SLEEP_DURATION);
+        }
+
+        driver.findElement(By.id("gradeDialogSave")).click();
         Thread.sleep(SLEEP_DURATION);
-
-        gradeWe = driver.findElement(By.xpath("//tr/td[5]/div/div/input"));
-        Thread.sleep(SLEEP_DURATION);
-
-        assertNotEquals(oldGrade, gradeWe.getAttribute("value"));
-        assertEquals(newGrade, gradeWe.getAttribute("value"));
-
-        gradeWe.sendKeys(Keys.BACK_SPACE);
-        gradeWe.sendKeys(oldGrade);
-
-        driver.findElement(By.id("saveChanges")).click();
-
-        driver.findElement(By.id("home")).click();
     }
 }
