@@ -1,39 +1,67 @@
 package com.cst438.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
-import java.sql.Date;
 import java.util.List;
 
 @Entity
 public class Section {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="section_no")
     private int sectionNo;  // unique id assigned by database.  Used to enroll into a section.
 
     @ManyToOne
     @JoinColumn(name="course_id", nullable=false)
     private Course course;
+
     @ManyToOne
     @JoinColumn(name="term_id", nullable=false)
     private Term term;
+
     @Column(name="sec_id")
     private int secId;   // sequential numbering of sections of a course in a term:  1, 2, 3, ....
+
     private String building;
+
     private String room;
+
     private String times;
+
     @Column(name="instructor_email")
     private String instructorEmail;
-
-    // TODO  uncomment the following lines
 
     @OneToMany(mappedBy="section")
     List<Enrollment> enrollments;
 
     @OneToMany(mappedBy="section")
     List<Assignment> assignments;
+
+    public Section() {}
+
+    public Section(
+        int sectionNo, Course course, Term term, int secId, String building, String room, String times,
+        String instructorEmail, List<Enrollment> enrollments, List<Assignment> assignments)
+    {
+        this.sectionNo = sectionNo;
+        this.course = course;
+        this.term = term;
+        this.secId = secId;
+        this.building = building;
+        this.room = room;
+        this.times = times;
+        this.instructorEmail = instructorEmail;
+        this.enrollments = enrollments;
+        this.assignments = assignments;
+    }
 
     public int getSectionNo() {
         return sectionNo;
@@ -103,5 +131,7 @@ public class Section {
         return enrollments;
     }
 
-    public List<Assignment> getAssignments() { return assignments; }
+    public List<Assignment> getAssignments() {
+        return assignments;
+    }
 }

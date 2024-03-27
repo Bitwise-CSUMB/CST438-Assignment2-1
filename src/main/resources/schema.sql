@@ -1,6 +1,10 @@
+
+create sequence term_seq;
+ALTER SEQUENCE term_seq RESTART WITH 500;
+
 create table term (
-    term_id  int primary key,
-    tyear     int not null check (tyear between 2000 and 2030),
+    term_id int default next value for term_seq primary key,
+    tyear int not null check (tyear between 2000 and 2030),
     semester varchar(10) not null check (semester in ('Spring', 'Fall')),
     add_date Date not null,
     add_deadline Date not null,
@@ -19,7 +23,7 @@ create sequence sec_seq;
 ALTER SEQUENCE sec_seq RESTART WITH 1000;
 
 create table section (
-    section_no int default next value for sec_seq  primary key,
+    section_no int default next value for sec_seq primary key,
     course_id varchar(10) not null,
     sec_id int not null not null,
     term_id int not null not null,
@@ -35,11 +39,11 @@ create sequence user_seq;
 ALTER SEQUENCE user_seq RESTART WITH 7000;
 
 create table user_table (
-	id integer  default next value for user_seq primary key,
+	id integer default next value for user_seq primary key,
     name varchar(50) not null,
     email varchar(50) not null unique,
     password varchar(100) not null,
-    type varchar(10) not null  check (type in ('STUDENT', 'ADMIN', 'INSTRUCTOR'))
+    type varchar(10) not null check (type in ('STUDENT', 'ADMIN', 'INSTRUCTOR'))
 );
 
 create sequence enroll_seq;
@@ -58,7 +62,7 @@ create sequence assignment_seq;
 ALTER SEQUENCE assignment_seq RESTART WITH 6000;
 
 create table assignment (
-    assignment_id int  default next value for assignment_seq primary key,
+    assignment_id int default next value for assignment_seq primary key,
     section_no int not null,
     title varchar(250) not null,
     due_date Date,
