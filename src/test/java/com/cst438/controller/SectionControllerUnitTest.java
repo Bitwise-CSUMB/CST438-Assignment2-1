@@ -1,7 +1,10 @@
 package com.cst438.controller;
 
+import com.cst438.domain.Assignment;
 import com.cst438.domain.Section;
 import com.cst438.domain.SectionRepository;
+import com.cst438.domain.AssignmentRepository;
+import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.SectionDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -121,8 +124,8 @@ public class SectionControllerUnitTest {
                 .andReturn()
                 .getResponse();
 
-        // response should be 400, BAD_REQUEST
-        assertEquals(400, response.getStatus());
+        // response should be 404, NOT_FOUND
+        assertEquals(404, response.getStatus());
 
         // check the expected error message
         String message = response.getErrorMessage();

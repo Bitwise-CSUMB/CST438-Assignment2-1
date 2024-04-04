@@ -1,3 +1,5 @@
+// Example system test provided by CST438 course repository, will error if ran.
+
 package com.cst438.controller;
 
 import org.junit.jupiter.api.AfterEach;
@@ -14,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SectionControllerSystemTest {
 
     // TODO edit the following to give the location and file name
-    // of the Chrome driver.
+    //  of the Chrome driver.
     //  for WinOS the file name will be chromedriver.exe
     //  for MacOS the file name will be chromedriver
     public static final String CHROME_DRIVER_FILE_LOCATION =
-            "C:/chromedriver_win32/chromedriver.exe";
+            "C:/chromedriver-win64/chromedriver.exe";
 
     //public static final String CHROME_DRIVER_FILE_LOCATION =
     //        "~/chromedriver_macOS/chromedriver";
@@ -29,8 +31,13 @@ public class SectionControllerSystemTest {
 
     // add selenium dependency to pom.xml
 
-    // these tests assumes that test data does NOT contain any
+    // these tests assume that test data does NOT contain any
     // sections for course cst499 in 2024 Spring term.
+
+    // there is also the assumption that the test data does NOT contain
+    // an assignment with title "Test Assignment 1"
+    // and dueDate "2024-03-01"
+    // for courseId "cst363"
 
     WebDriver driver;
 
