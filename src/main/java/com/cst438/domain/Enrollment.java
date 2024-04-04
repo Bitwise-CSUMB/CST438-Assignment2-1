@@ -1,6 +1,5 @@
 package com.cst438.domain;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,9 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-
-import java.util.List;
 
 @Entity
 public class Enrollment {
@@ -33,18 +29,13 @@ public class Enrollment {
     @JoinColumn(name = "section_no", nullable = false)
     private Section section;
 
-    // One to Many relationship between enrollment and grade
-    @OneToMany(mappedBy = "enrollment", cascade = CascadeType.REMOVE)
-    List<Grade> grades;
-
     public Enrollment() {}
 
-    public Enrollment(int enrollmentId, String grade, User user, Section section, List<Grade> grades) {
+    public Enrollment(int enrollmentId, String grade, User user, Section section) {
         this.enrollmentId = enrollmentId;
         this.grade = grade;
         this.user = user;
         this.section = section;
-        this.grades = grades;
     }
 
     // add getter/setter methods
