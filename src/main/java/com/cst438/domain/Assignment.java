@@ -35,6 +35,15 @@ public class Assignment {
     @OneToMany(mappedBy = "assignment")
     List<Grade> grades;
 
+    public Assignment() {}
+
+    public Assignment(int assignmentId, String title, Date dueDate, Section section) {
+        this.assignmentId = assignmentId;
+        this.title = title;
+        this.dueDate = dueDate;
+        this.section = section;
+    }
+
     // add getter and setter methods
     public int getAssignmentId() {
         return this.assignmentId;
