@@ -38,7 +38,7 @@ public class AssignmentController {
     UserRepository userRepository;
 
     @Autowired
-    RegistrarServiceProxy registrarServiceProxy = new RegistrarServiceProxy();
+    RegistrarServiceProxy registrarServiceProxy;
 
     // get Sections for an instructor
     // example URL  /sections?instructorEmail=dwisneski@csumb.edu&year=2024&semester=Spring
