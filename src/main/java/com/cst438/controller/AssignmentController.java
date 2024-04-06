@@ -5,6 +5,8 @@ import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.AssignmentStudentDTO;
 import com.cst438.dto.GradeDTO;
 import com.cst438.dto.SectionDTO;
+import com.cst438.service.RegistrarServiceProxy;
+
 import java.sql.Date;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
@@ -34,6 +36,9 @@ public class AssignmentController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RegistrarServiceProxy registrarServiceProxy = new RegistrarServiceProxy();
 
     // get Sections for an instructor
     // example URL  /sections?instructorEmail=dwisneski@csumb.edu&year=2024&semester=Spring
@@ -304,6 +309,7 @@ public class AssignmentController {
                     a.getSection().getCourse().getCourseId(), a.getSection().getSecId(),
                     a.getSection().getSectionNo()));
         }
+        registrarServiceProxy.testMessage("woooooop testy");
         return dto_list;
     }
 }

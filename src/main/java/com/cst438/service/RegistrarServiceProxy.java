@@ -21,6 +21,10 @@ public class RegistrarServiceProxy {
     @Autowired
     RabbitTemplate rabbitTemplate;
 
+    public void testMessage(String message) {
+        sendMessage(message);
+    }
+
     @RabbitListener(queues = "gradebook_service")
     public void receiveFromRegistrar(String message)  {
         try {
