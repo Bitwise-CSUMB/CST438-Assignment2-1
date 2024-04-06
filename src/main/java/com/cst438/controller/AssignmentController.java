@@ -48,7 +48,6 @@ public class AssignmentController {
             @RequestParam("year") int year ,
             @RequestParam("semester") String semester )  {
 
-
         List<Section> sections = sectionRepository.findByInstructorEmailAndYearAndSemester(instructorEmail, year, semester);
 
         List<SectionDTO> dto_list = new ArrayList<>();
