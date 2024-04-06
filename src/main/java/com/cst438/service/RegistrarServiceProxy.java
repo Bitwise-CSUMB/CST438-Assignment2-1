@@ -31,17 +31,31 @@ public class RegistrarServiceProxy {
             System.out.println("Receive from Registrar " + message);
             String[] parts = message.split(" ", 2);
             switch (parts[0]) {
+                case "addCourse":
+                    // example "addCourse {"courseId":"cst238","title":"Data Structures","credits":5}"
+                    break;
+                case "updateCourse":
+                    // example "updateCourse {"courseId":"cst238","title":"Data Structures Updated","credits":10}"
+                    break;
+                case "deleteCourse":
+                    // example "deleteCourse cst238"
+                    break;
+                case "addSection":
+                    // example "addSection {"secNo":1000,"year":2023,"semester":"Fall","courseId":"cst363","secId":3
+                    // ,"building":"052","room":"102","times":"M W 10:00-11:50","instructorName":"david wisneski","instructorEmail":"dwisneski@csumb.edu"}"
+                    break;
+                case "updateSection":
+                    // example "updateSection {"secNo":3,"year":2023,"semester":"Fall","courseId":"cst363","secId":3
+                    // ,"building":"109","room":"102","times":"M W 10:00-11:50","instructorName":"david wisneski","instructorEmail":"jgross@csumb.edu"}"
+                    break;
+                case "deleteSection":
+                    // example "deleteSection 3"
+                    break;
                 case "addAssignment":
                     break;
                 case "updateAssignment":
                     break;
                 case "deleteAssignment":
-                    break;
-                case "addCourse":
-                    break;
-                case "updateCourse":
-                    break;
-                case "deleteCourse":
                     break;
                 case "addEnrollment":
                     break;
