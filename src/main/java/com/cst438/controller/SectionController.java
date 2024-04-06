@@ -156,6 +156,7 @@ public class SectionController {
         return dto_list;
     }
 
+    // WAS MOVED TO ASSIGNMENT CONTROLLER IN GRADEBOOK BACKEND, REMOVE THIS?
     // get Sections for an instructor
     // example URL  /sections?instructorEmail=dwisneski@csumb.edu&year=2024&semester=Spring
     @GetMapping("/sections")

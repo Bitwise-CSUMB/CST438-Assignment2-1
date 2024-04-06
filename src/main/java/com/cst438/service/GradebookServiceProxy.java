@@ -53,17 +53,8 @@ public class GradebookServiceProxy {
             System.out.println("Receive from Gradebook " + message);
             String[] parts = message.split(" ", 2);
             switch (parts[0]) {
-                case "addCourse":
-                    break;
-                case "updateCourse":
-                    break;
-                case "deleteCourse":
-                    break;
-                case "addEnrollment":
-                    break;
                 case "updateEnrollment":
-                    break;
-                case "deleteEnrollment":
+                    // From what I can tell we only need to be able to update enrollments from the Gradebook database.
                     break;
                 default:
                     System.out.println("Option not implemented: " + parts[0]);
