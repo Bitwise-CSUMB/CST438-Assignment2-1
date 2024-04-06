@@ -2,6 +2,8 @@ package com.cst438.controller;
 
 import com.cst438.domain.*;
 import com.cst438.dto.SectionDTO;
+import com.cst438.service.GradebookServiceProxy;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,9 @@ import java.util.List;
 public class SectionController {
 
     @Autowired
+    GradebookServiceProxy gradebookServiceProxy;
+
+    @Autowired
     CourseRepository courseRepository;
 
     @Autowired
@@ -25,7 +30,6 @@ public class SectionController {
 
     @Autowired
     UserRepository userRepository;
-
 
     // ADMIN function to create a new section
     @PostMapping("/sections")
@@ -61,18 +65,21 @@ public class SectionController {
         }
 
         sectionRepository.save(s);
-        return new SectionDTO(
-                s.getSectionNo(),
-                s.getTerm().getYear(),
-                s.getTerm().getSemester(),
-                s.getCourse().getCourseId(),
-                s.getSecId(),
-                s.getBuilding(),
-                s.getRoom(),
-                s.getTimes(),
-                (instructor!=null) ? instructor.getName() : "",
-                (instructor!=null) ? instructor.getEmail() : ""
+        SectionDTO dto = new SectionDTO(
+            s.getSectionNo(),
+            s.getTerm().getYear(),
+            s.getTerm().getSemester(),
+            s.getCourse().getCourseId(),
+            s.getSecId(),
+            s.getBuilding(),
+            s.getRoom(),
+            s.getTimes(),
+            (instructor!=null) ? instructor.getName() : "",
+            (instructor!=null) ? instructor.getEmail() : ""
         );
+
+        gradebookServiceProxy.addSection(dto);
+        return dto;
     }
 
     // ADMIN function to update a section
@@ -89,7 +96,7 @@ public class SectionController {
         s.setTimes(section.times());
 
         User instructor = null;
-        if (section.instructorEmail()==null || section.instructorEmail().equals("")) {
+        if (section.instructorEmail() == null || section.instructorEmail().equals("")) {
             s.setInstructor_email("");
         } else {
             instructor = userRepository.findByEmail(section.instructorEmail());
@@ -98,6 +105,8 @@ public class SectionController {
             }
             s.setInstructor_email(section.instructorEmail());
         }
+
+        gradebookServiceProxy.updateSection(section);
         sectionRepository.save(s);
     }
 
@@ -107,10 +116,10 @@ public class SectionController {
     public void deleteSection(@PathVariable int sectionno) {
         Section s = sectionRepository.findById(sectionno).orElse(null);
         if (s != null) {
+            gradebookServiceProxy.deleteSection(sectionno);
             sectionRepository.delete(s);
         }
     }
-
 
     // get Sections for a course with request params year, semester
     // example URL   /course/cst363/sections?year=2024&semester=Spring

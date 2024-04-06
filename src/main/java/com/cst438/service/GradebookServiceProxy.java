@@ -1,5 +1,7 @@
 package com.cst438.service;
 
+import com.cst438.dto.CourseDTO;
+import com.cst438.dto.SectionDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,18 +23,36 @@ public class GradebookServiceProxy {
     @Autowired
     RabbitTemplate rabbitTemplate;
 
+    public void addCourse(CourseDTO course) {
+        sendMessage("addCourse " + asJsonString(course));
+    }
+
+    public void updateCourse(CourseDTO course) {
+        sendMessage("updateCourse " + asJsonString(course));
+    }
+
+    public void deleteCourse(String courseId) {
+        sendMessage("deleteCourse " + courseId);
+    }
+
+    public void addSection(SectionDTO section) {
+        sendMessage("addSection " + asJsonString(section));
+    }
+
+    public void updateSection(SectionDTO section) {
+        sendMessage("updateSection " + asJsonString(section));
+    }
+
+    public void deleteSection(int sectionId) {
+        sendMessage("deleteSection " + sectionId);
+    }
+
     @RabbitListener(queues = "registrar_service")
     public void receiveFromGradebook(String message)  {
         try {
             System.out.println("Receive from Gradebook " + message);
             String[] parts = message.split(" ", 2);
             switch (parts[0]) {
-                case "addAssignment":
-                    break;
-                case "updateAssignment":
-                    break;
-                case "deleteAssignment":
-                    break;
                 case "addCourse":
                     break;
                 case "updateCourse":
