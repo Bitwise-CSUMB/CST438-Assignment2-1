@@ -1,14 +1,21 @@
 package com.cst438.service;
 
+import com.cst438.domain.Enrollment;
+import com.cst438.domain.EnrollmentRepository;
 import com.cst438.dto.CourseDTO;
+import com.cst438.dto.EnrollmentDTO;
 import com.cst438.dto.SectionDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
+
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class GradebookServiceProxy {
@@ -22,6 +29,9 @@ public class GradebookServiceProxy {
 
     @Autowired
     RabbitTemplate rabbitTemplate;
+    
+    @Autowired
+    EnrollmentRepository enrollmentRepository;
 
     public void addCourse(CourseDTO course) {
         sendMessage("addCourse " + asJsonString(course));
@@ -54,7 +64,17 @@ public class GradebookServiceProxy {
             String[] parts = message.split(" ", 2);
             switch (parts[0]) {
                 case "updateEnrollment":
-                    // From what I can tell we only need to be able to update enrollments from the Gradebook database.
+                    EnrollmentDTO enrollmentDTO = fromJsonString(parts[1], EnrollmentDTO.class);
+                    Optional<Enrollment> optionalEnrollment = enrollmentRepository.findById(enrollmentDTO.enrollmentId());
+                    if (optionalEnrollment.isPresent()) {
+                        Enrollment enrollment = optionalEnrollment.get();
+                        // update the grade and save back to database
+                        enrollment.setGrade(enrollmentDTO.grade());
+                        enrollmentRepository.save(enrollment);
+                    } else {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Invalid enrollment " + enrollmentDTO.enrollmentId());
+                    }
                     break;
                 default:
                     System.out.println("Option not implemented: " + parts[0]);
