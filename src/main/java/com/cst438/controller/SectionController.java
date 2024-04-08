@@ -4,6 +4,7 @@ import com.cst438.domain.*;
 import com.cst438.dto.SectionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,6 +30,7 @@ public class SectionController {
 
     // ADMIN function to create a new section
     @PostMapping("/sections")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public SectionDTO addSection(@RequestBody SectionDTO section) {
 
         Course course = courseRepository.findById(section.courseId()).orElse(null);
@@ -66,6 +68,7 @@ public class SectionController {
                 s.getTerm().getYear(),
                 s.getTerm().getSemester(),
                 s.getCourse().getCourseId(),
+                s.getCourse().getTitle(),
                 s.getSecId(),
                 s.getBuilding(),
                 s.getRoom(),
@@ -77,6 +80,7 @@ public class SectionController {
 
     // ADMIN function to update a section
     @PutMapping("/sections")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public void updateSection(@RequestBody SectionDTO section) {
         // can only change instructor email, sec_id, building, room, times, start, end dates
         Section s = sectionRepository.findById(section.secNo()).orElse(null);
@@ -104,6 +108,7 @@ public class SectionController {
     // ADMIN function to create a delete section
     // delete will fail there are related assignments or enrollments
     @DeleteMapping("/sections/{sectionno}")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public void deleteSection(@PathVariable int sectionno) {
         Section s = sectionRepository.findById(sectionno).orElse(null);
         if (s != null) {
@@ -135,6 +140,7 @@ public class SectionController {
                     s.getTerm().getYear(),
                     s.getTerm().getSemester(),
                     s.getCourse().getCourseId(),
+                    s.getCourse().getTitle(),
                     s.getSecId(),
                     s.getBuilding(),
                     s.getRoom(),
@@ -150,6 +156,7 @@ public class SectionController {
     // get Sections for an instructor
     // example URL  /sections?instructorEmail=dwisneski@csumb.edu&year=2024&semester=Spring
     @GetMapping("/sections")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public List<SectionDTO> getSectionsForInstructor(
             @RequestParam("email") String instructorEmail,
             @RequestParam("year") int year ,
@@ -169,6 +176,7 @@ public class SectionController {
                     s.getTerm().getYear(),
                     s.getTerm().getSemester(),
                     s.getCourse().getCourseId(),
+                    s.getCourse().getTitle(),
                     s.getSecId(),
                     s.getBuilding(),
                     s.getRoom(),
@@ -193,6 +201,7 @@ public class SectionController {
                     s.getTerm().getYear(),
                     s.getTerm().getSemester(),
                     s.getCourse().getCourseId(),
+                    s.getCourse().getTitle(),
                     s.getSecId(),
                     s.getBuilding(),
                     s.getRoom(),
