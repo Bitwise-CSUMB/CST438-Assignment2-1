@@ -3,6 +3,7 @@ package com.cst438.controller;
 
 import com.cst438.domain.*;
 import com.cst438.dto.EnrollmentDTO;
+import com.cst438.service.GradebookServiceProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,9 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 public class StudentController {
+
+    @Autowired
+    GradebookServiceProxy gradebookServiceProxy;
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
@@ -117,6 +121,7 @@ public class StudentController {
         newEnrollment.setSection(section);
         enrollmentRepository.save(newEnrollment);
 
+        gradebookServiceProxy.enrollInCourse(EnrollmentDTO.fromEntity(newEnrollment));
         return EnrollmentDTO.fromEntity(newEnrollment);
     }
 
@@ -141,6 +146,6 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Drop deadline has been exceeded");
         }
 
-        enrollmentRepository.delete(enrollment);
+        gradebookServiceProxy.dropCourse(enrollmentId);
     }
 }

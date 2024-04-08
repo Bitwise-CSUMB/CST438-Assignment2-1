@@ -2,7 +2,9 @@ package com.cst438.controller;
 
 import com.cst438.domain.User;
 import com.cst438.domain.UserRepository;
+import com.cst438.dto.EnrollmentDTO;
 import com.cst438.dto.UserDTO;
+import com.cst438.service.GradebookServiceProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,9 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
+
+    @Autowired
+    GradebookServiceProxy gradebookServiceProxy;
 
     @Autowired
     UserRepository userRepository;
@@ -57,6 +62,7 @@ public class UserController {
             throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "invalid user type");
         }
         userRepository.save(user);
+        gradebookServiceProxy.addUser(user);
         return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getType());
     }
 
@@ -76,6 +82,7 @@ public class UserController {
             throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "invalid user type");
         }
         userRepository.save(user);
+        gradebookServiceProxy.updateUser(user);
         return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getType());
     }
 
@@ -85,6 +92,7 @@ public class UserController {
         if (user!=null) {
             userRepository.delete(user);
         }
+        gradebookServiceProxy.deleteUser(id);
 
     }
 

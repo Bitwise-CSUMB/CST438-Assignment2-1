@@ -2,6 +2,7 @@ package com.cst438.service;
 
 import com.cst438.domain.Enrollment;
 import com.cst438.domain.EnrollmentRepository;
+import com.cst438.domain.User;
 import com.cst438.dto.CourseDTO;
 import com.cst438.dto.EnrollmentDTO;
 import com.cst438.dto.SectionDTO;
@@ -55,6 +56,25 @@ public class GradebookServiceProxy {
 
     public void deleteSection(int sectionId) {
         sendMessage("deleteSection " + sectionId);
+    }
+
+    public void enrollInCourse(EnrollmentDTO enrollment){
+        sendMessage("addEnrollment "+ asJsonString(enrollment));
+    }
+
+    public void dropCourse(int enrollmentId){
+        sendMessage("dropEnrollment " + enrollmentId);
+    }
+
+    public void addUser(User user){
+        sendMessage("addUser " + asJsonString(user));
+    }
+    public void updateUser(User user){
+        sendMessage("updateUser " + asJsonString(user));
+    }
+
+    public void deleteUser(int userId){
+        sendMessage("updateUser " + userId);
     }
 
     @RabbitListener(queues = "registrar_service")
