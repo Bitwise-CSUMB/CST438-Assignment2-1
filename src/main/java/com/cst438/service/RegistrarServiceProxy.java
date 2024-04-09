@@ -211,7 +211,7 @@ public class RegistrarServiceProxy {
 
         // Update section
         final Section section = fetchEntity("Section", sectionRepository::findById, enrollmentDTO,
-            EnrollmentDTO::sectionId
+            EnrollmentDTO::sectionNo
         );
         if (section == null) return false;
         enrollment.setSection(section);
