@@ -61,141 +61,132 @@ public class RegistrarServiceProxy {
     }
 
     @RabbitListener(queues = "gradebook_service")
-    public void receiveFromRegistrar(String message)  {
+    public void receiveFromRegistrar(String message) {
         try {
             System.out.println("Receive from Registrar " + message);
             String[] parts = message.split(" ", 2);
-            if (parts[0].contains("Course")) {
-                switch (parts[0]) {
-                    case "addCourse": {
-                        // example "addCourse {"courseId":"cst238","title":"Data Structures","credits":5}"
-                        newEntityFromDTO(
-                            new Course(),                              // EntityType newEntity
-                            fromJsonString(parts[1], CourseDTO.class), // DTOType dto
-                            CourseDTO::courseId,                       // Function<DTOType, KeyType> idSupplier
-                            Course::setCourseId,                       // BiConsumer<DTOType, KeyType> idConsumer
-                            RegistrarServiceProxy::fillCourseFromDTO,  // BiFunction<EntityType, DTOType, Boolean> fillFunc
-                            courseRepository                           // CrudRepository<EntityType, KeyType> repository
-                        );
-                        break;
-                    }
-                    case "updateCourse": {
-                        // example "updateCourse {"courseId":"cst238","title":"Data Structures Updated","credits":10}"
-                        updateEntityFromDTO(
-                            "Course",                                  // String entityName,
-                            fromJsonString(parts[1], CourseDTO.class), // DTOType dto,
-                            CourseDTO::courseId,                       // Function<DTOType, KeyType> idSupplier,
-                            courseRepository,                          // CrudRepository<EntityType, KeyType> repository,
-                            RegistrarServiceProxy::fillCourseFromDTO   // BiFunction<EntityType, DTOType, Boolean> fillFunc
-                        );
-                        break;
-                    }
-                    case "deleteCourse": {
-                        // example "deleteCourse cst238"
-                        courseRepository.deleteById(parts[1]);
-                        break;
-                    }
-                    default: {
-                        System.out.println("Option not implemented: " + parts[0]);
-                    }
+            switch (parts[0]) {
+                /////////////////////
+                // Course Commands //
+                /////////////////////
+                case "addCourse": {
+                    // example "addCourse {"courseId":"cst238","title":"Data Structures","credits":5}"
+                    newEntityFromDTO(
+                        new Course(),                              // EntityType newEntity
+                        fromJsonString(parts[1], CourseDTO.class), // DTOType dto
+                        CourseDTO::courseId,                       // Function<DTOType, KeyType> idSupplier
+                        Course::setCourseId,                       // BiConsumer<DTOType, KeyType> idConsumer
+                        RegistrarServiceProxy::fillCourseFromDTO,  // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                        courseRepository                           // CrudRepository<EntityType, KeyType> repository
+                    );
+                    break;
                 }
-            } else if (parts[0].contains("Section")) {
-                if (parts[0].equals("deleteSection")) {
-                    Section s = sectionRepository.findById(Integer.parseInt(parts[1])).orElse(null);
-                } else {
+                case "updateCourse": {
+                    // example "updateCourse {"courseId":"cst238","title":"Data Structures Updated","credits":10}"
+                    updateEntityFromDTO(
+                        "Course",                                  // String entityName,
+                        fromJsonString(parts[1], CourseDTO.class), // DTOType dto,
+                        CourseDTO::courseId,                       // Function<DTOType, KeyType> idSupplier,
+                        courseRepository,                          // CrudRepository<EntityType, KeyType> repository,
+                        RegistrarServiceProxy::fillCourseFromDTO   // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                    );
+                    break;
+                }
+                case "deleteCourse": {
+                    // example "deleteCourse cst238"
+                    courseRepository.deleteById(parts[1]);
+                    break;
+                }
+                /////////////////////////
+                // Enrollment Commands //
+                /////////////////////////
+                case "addEnrollment": {
+                    newEntityFromDTO(
+                        new Enrollment(),                              // EntityType newEntity
+                        fromJsonString(parts[1], EnrollmentDTO.class), // DTOType dto
+                        EnrollmentDTO::enrollmentId,                   // Function<DTOType, KeyType> idSupplier
+                        Enrollment::setEnrollmentId,                   // BiConsumer<DTOType, KeyType> idConsumer
+                        this::fillEnrollmentFromDTO,                   // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                        enrollmentRepository                           // CrudRepository<EntityType, KeyType> repository
+                    );
+                    break;
+                }
+                case "dropEnrollment": {
+                    enrollmentRepository.deleteById(Integer.valueOf(parts[1], 10));
+                    break;
+                }
+                //////////////////////
+                // Section Commands //
+                //////////////////////
+                case "addSection": {
+                    SectionDTO sectionDTO = fromJsonString(parts[1], SectionDTO.class);
+                    Section section = new Section();
+                    section.setSectionNo(sectionDTO.secNo());
+                    Term t = termRepository.findByYearAndSemester(sectionDTO.year(), sectionDTO.semester());
+                    section.setTerm(t);
+                    section.setSecId(sectionDTO.secId());
+                    section.setBuilding(sectionDTO.building());
+                    section.setRoom(sectionDTO.room());
+                    section.setTimes(sectionDTO.times());
+                    section.setInstructor_email(sectionDTO.instructorEmail());
+                    Course c = courseRepository.findById(sectionDTO.courseId()).orElse(null);
+                    section.setCourse(c);
+                    sectionRepository.save(section);
+                    break;
+                }
+                case "updateSection": {
                     SectionDTO sectionDTO = fromJsonString(parts[1], SectionDTO.class);
                     Section s = sectionRepository.findById(sectionDTO.secNo()).orElse(null);
-                    if (s == null) {
-                        switch (parts[0]) {
-                            case "addSection":
-                                Section section = new Section();
-                                section.setSectionNo(sectionDTO.secNo());
-                                Term t = termRepository.findByYearAndSemester(sectionDTO.year(), sectionDTO.semester());
-                                section.setTerm(t);
-                                section.setSecId(sectionDTO.secId());
-                                section.setBuilding(sectionDTO.building());
-                                section.setRoom(sectionDTO.room());
-                                section.setTimes(sectionDTO.times());
-                                section.setInstructor_email(sectionDTO.instructorEmail());
-                                Course c = courseRepository.findById(sectionDTO.courseId()).orElse(null);
-                                section.setCourse(c);
-                                sectionRepository.save(section);
-                                break;
-                            default:
-                                System.out.println("Option not implemented: " + parts[0]);
-                        }
-                    } else {
-                        switch (parts[0]) {
-                            case "updateSection":
-                                s.setSecId(sectionDTO.secId());
-                                s.setBuilding(sectionDTO.building());
-                                s.setRoom(sectionDTO.room());
-                                s.setTimes(sectionDTO.times());
-                                if (sectionDTO.instructorEmail() == null || sectionDTO.instructorEmail().isEmpty()) {
-                                    s.setInstructor_email(sectionDTO.instructorEmail());
-                                }
-                                break;
-                            default:
-                                System.out.println("Option not implemented: " + parts[0]);
-                        }
+                    s.setSecId(sectionDTO.secId());
+                    s.setBuilding(sectionDTO.building());
+                    s.setRoom(sectionDTO.room());
+                    s.setTimes(sectionDTO.times());
+                    if (sectionDTO.instructorEmail() == null || sectionDTO.instructorEmail().isEmpty()) {
+                        s.setInstructor_email(sectionDTO.instructorEmail());
                     }
+                    break;
                 }
-            } else if (parts[0].contains("Enrollment")) {
-                switch (parts[0]) {
-                    case "addEnrollment": {
-                        newEntityFromDTO(
-                            new Enrollment(),                              // EntityType newEntity
-                            fromJsonString(parts[1], EnrollmentDTO.class), // DTOType dto
-                            EnrollmentDTO::enrollmentId,                   // Function<DTOType, KeyType> idSupplier
-                            Enrollment::setEnrollmentId,                   // BiConsumer<DTOType, KeyType> idConsumer
-                            this::fillEnrollmentFromDTO,                   // BiFunction<EntityType, DTOType, Boolean> fillFunc
-                            enrollmentRepository                           // CrudRepository<EntityType, KeyType> repository
-                        );
-                        break;
-                    }
-                    case "dropEnrollment": {
-                        enrollmentRepository.deleteById(Integer.valueOf(parts[1], 10));
-                        break;
-                    }
-                    default: {
-                        System.out.println("Option not implemented: " + parts[0]);
-                    }
+                case "deleteSection": {
+                    Section s = sectionRepository.findById(Integer.parseInt(parts[1])).orElse(null);
+                    break;
                 }
-            } else if (parts[0].contains("User")) {
-                switch (parts[0]) {
-                    case "addUser": {
-                        newEntityFromDTO(
-                            new User(),                              // EntityType newEntity
-                            fromJsonString(parts[1], UserDTO.class), // DTOType dto
-                            UserDTO::id,                             // Function<DTOType, KeyType> idSupplier
-                            User::setId,                             // BiConsumer<DTOType, KeyType> idConsumer
-                            RegistrarServiceProxy::fillUserFromDTO,  // BiFunction<EntityType, DTOType, Boolean> fillFunc
-                            userRepository                           // CrudRepository<EntityType, KeyType> repository
-                        );
-                        break;
-                    }
-                    case "updateUser": {
-                        updateEntityFromDTO(
-                            "User",                                  // String entityName,
-                            fromJsonString(parts[1], UserDTO.class), // DTOType dto,
-                            UserDTO::id,                             // Function<DTOType, KeyType> idSupplier,
-                            userRepository,                          // CrudRepository<EntityType, KeyType> repository,
-                            RegistrarServiceProxy::fillUserFromDTO   // BiFunction<EntityType, DTOType, Boolean> fillFunc
-                        );
-                        break;
-                    }
-                    case "deleteUser": {
-                        userRepository.deleteById(Integer.valueOf(parts[1], 10));
-                        break;
-                    }
-                    default: {
-                        System.out.println("Option not implemented: " + parts[0]);
-                    }
+                ///////////////////
+                // User Commands //
+                ///////////////////
+                case "addUser": {
+                    newEntityFromDTO(
+                        new User(),                              // EntityType newEntity
+                        fromJsonString(parts[1], UserDTO.class), // DTOType dto
+                        UserDTO::id,                             // Function<DTOType, KeyType> idSupplier
+                        User::setId,                             // BiConsumer<DTOType, KeyType> idConsumer
+                        RegistrarServiceProxy::fillUserFromDTO,  // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                        userRepository                           // CrudRepository<EntityType, KeyType> repository
+                    );
+                    break;
                 }
-            } else {
-                System.out.println("Option not implemented: " + parts[0]);
+                case "updateUser": {
+                    updateEntityFromDTO(
+                        "User",                                  // String entityName,
+                        fromJsonString(parts[1], UserDTO.class), // DTOType dto,
+                        UserDTO::id,                             // Function<DTOType, KeyType> idSupplier,
+                        userRepository,                          // CrudRepository<EntityType, KeyType> repository,
+                        RegistrarServiceProxy::fillUserFromDTO   // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                    );
+                    break;
+                }
+                case "deleteUser": {
+                    userRepository.deleteById(Integer.valueOf(parts[1], 10));
+                    break;
+                }
+                /////////////
+                // Default //
+                /////////////
+                default: {
+                    System.out.println("Command not implemented: " + parts[0]);
+                }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.out.println("Exception in receivedFromRegistrar " + e.getMessage());
         }
     }
@@ -214,7 +205,7 @@ public class RegistrarServiceProxy {
     private static boolean fillUserFromDTO(User user, UserDTO userDTO) {
         user.setName(userDTO.name());
         user.setEmail(userDTO.email());
-        user.setPassword(""); // Password not part of the DTO
+        user.setPassword(""); // Password intentionally not mirrored - grade book service doesn't need to know it
         user.setType(userDTO.type());
         return true;
     }
@@ -313,15 +304,17 @@ public class RegistrarServiceProxy {
     private static String asJsonString(final Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static <T> T  fromJsonString(String str, Class<T> valueType ) {
+    private static <T> T fromJsonString(String str, Class<T> valueType) {
         try {
             return new ObjectMapper().readValue(str, valueType);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
