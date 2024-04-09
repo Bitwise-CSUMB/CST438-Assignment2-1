@@ -95,9 +95,18 @@ public class RegistrarServiceProxy {
                 switch (parts[0]) {
                     case "addEnrollment":
                         break;
-                    case "updateEnrollment":
+                    case "dropEnrollment":
                         break;
-                    case "deleteEnrollment":
+                    default:
+                        System.out.println("Option not implemented: " + parts[0]);
+                }
+            } else if (parts[0].contains("User")) {
+                switch (parts[0]) {
+                    case "addUser":
+                        break;
+                    case "updateUser":
+                        break;
+                    case "deleteUser":
                         break;
                     default:
                         System.out.println("Option not implemented: " + parts[0]);
