@@ -188,6 +188,10 @@ public class RegistrarServiceProxy {
                         );
                         break;
                     }
+                    case "dropEnrollment": {
+                        enrollmentRepository.deleteById(Integer.valueOf(parts[1], 10));
+                        break;
+                    }
                     default: {
                         System.out.println("Option not implemented: " + parts[0]);
                     }
