@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EnrollmentControllerSystemTest {
 
-    // TODO edit the following to give the location and file name
+    // edit the following to give the location and file name
     //  of the Chrome driver.
     //  for WinOS the file name will be chromedriver.exe
     //  for MacOS the file name will be chromedriver
