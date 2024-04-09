@@ -74,7 +74,7 @@ public class GradebookServiceProxy {
     }
 
     public void deleteUser(int userId){
-        sendMessage("updateUser " + userId);
+        sendMessage("deleteUser " + userId);
     }
 
     @RabbitListener(queues = "registrar_service")
