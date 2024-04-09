@@ -2,13 +2,11 @@ package com.cst438.service;
 
 import com.cst438.domain.Enrollment;
 import com.cst438.domain.EnrollmentRepository;
-import com.cst438.domain.User;
 import com.cst438.dto.CourseDTO;
 import com.cst438.dto.EnrollmentDTO;
 import com.cst438.dto.SectionDTO;
+import com.cst438.dto.UserDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Optional;
-
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -17,6 +15,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @Service
 public class GradebookServiceProxy {
@@ -66,10 +66,10 @@ public class GradebookServiceProxy {
         sendMessage("dropEnrollment " + enrollmentId);
     }
 
-    public void addUser(User user){
+    public void addUser(UserDTO user){
         sendMessage("addUser " + asJsonString(user));
     }
-    public void updateUser(User user){
+    public void updateUser(UserDTO user){
         sendMessage("updateUser " + asJsonString(user));
     }
 

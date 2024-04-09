@@ -2,14 +2,20 @@ package com.cst438.controller;
 
 import com.cst438.domain.User;
 import com.cst438.domain.UserRepository;
-import com.cst438.dto.EnrollmentDTO;
 import com.cst438.dto.UserDTO;
 import com.cst438.service.GradebookServiceProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +68,7 @@ public class UserController {
             throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "invalid user type");
         }
         userRepository.save(user);
-        gradebookServiceProxy.addUser(user);
+        gradebookServiceProxy.addUser(UserDTO.fromEntity(user));
         return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getType());
     }
 
@@ -82,7 +88,7 @@ public class UserController {
             throw  new ResponseStatusException( HttpStatus.BAD_REQUEST, "invalid user type");
         }
         userRepository.save(user);
-        gradebookServiceProxy.updateUser(user);
+        gradebookServiceProxy.updateUser(UserDTO.fromEntity(user));
         return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getType());
     }
 
@@ -95,5 +101,4 @@ public class UserController {
         gradebookServiceProxy.deleteUser(id);
 
     }
-
 }
