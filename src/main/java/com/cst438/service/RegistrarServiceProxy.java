@@ -16,6 +16,7 @@ import com.cst438.dto.EnrollmentDTO;
 import com.cst438.domain.Term;
 import com.cst438.domain.TermRepository;
 import com.cst438.dto.SectionDTO;
+import com.cst438.dto.UserDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -193,14 +194,34 @@ public class RegistrarServiceProxy {
                 }
             } else if (parts[0].contains("User")) {
                 switch (parts[0]) {
-                    case "addUser":
+                    case "addUser": {
+                        newEntityFromDTO(
+                            new User(),                              // EntityType newEntity
+                            fromJsonString(parts[1], UserDTO.class), // DTOType dto
+                            UserDTO::id,                             // Function<DTOType, KeyType> idSupplier
+                            User::setId,                             // BiConsumer<DTOType, KeyType> idConsumer
+                            RegistrarServiceProxy::fillUserFromDTO,  // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                            userRepository                           // CrudRepository<EntityType, KeyType> repository
+                        );
                         break;
-                    case "updateUser":
+                    }
+                    case "updateUser": {
+                        updateEntityFromDTO(
+                            "User",                                  // String entityName,
+                            fromJsonString(parts[1], UserDTO.class), // DTOType dto,
+                            UserDTO::id,                             // Function<DTOType, KeyType> idSupplier,
+                            userRepository,                          // CrudRepository<EntityType, KeyType> repository,
+                            RegistrarServiceProxy::fillUserFromDTO   // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                        );
                         break;
-                    case "deleteUser":
+                    }
+                    case "deleteUser": {
+                        userRepository.deleteById(Integer.valueOf(parts[1], 10));
                         break;
-                    default:
+                    }
+                    default: {
                         System.out.println("Option not implemented: " + parts[0]);
+                    }
                 }
             } else {
                 System.out.println("Option not implemented: " + parts[0]);
@@ -218,6 +239,14 @@ public class RegistrarServiceProxy {
     private static boolean fillCourseFromDTO(Course course, CourseDTO enrollmentDTO) {
         course.setTitle(enrollmentDTO.title());
         course.setCredits(enrollmentDTO.credits());
+        return true;
+    }
+
+    private static boolean fillUserFromDTO(User user, UserDTO userDTO) {
+        user.setName(userDTO.name());
+        user.setEmail(userDTO.email());
+        // Password not part of the DTO
+        user.setType(userDTO.type());
         return true;
     }
 
