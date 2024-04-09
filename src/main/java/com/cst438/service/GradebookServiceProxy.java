@@ -21,18 +21,22 @@ import java.util.Optional;
 @Service
 public class GradebookServiceProxy {
 
-    Queue gradebookServiceQueue = new Queue("gradebook_service", true);
+    private final Queue gradebookServiceQueue = new Queue("gradebook_service", true);
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     @Bean
     public Queue createQueue() {
         return new Queue("registrar_service", true);
     }
 
-    @Autowired
-    RabbitTemplate rabbitTemplate;
-    
-    @Autowired
-    EnrollmentRepository enrollmentRepository;
+    ////////////////////////////
+    // Course Command Sending //
+    ////////////////////////////
 
     public void addCourse(CourseDTO course) {
         sendMessage("addCourse " + asJsonString(course));
@@ -46,6 +50,22 @@ public class GradebookServiceProxy {
         sendMessage("deleteCourse " + courseId);
     }
 
+    ////////////////////////////////
+    // Enrollment Command Sending //
+    ////////////////////////////////
+
+    public void enrollInCourse(EnrollmentDTO enrollment){
+        sendMessage("addEnrollment "+ asJsonString(enrollment));
+    }
+
+    public void dropCourse(int enrollmentId){
+        sendMessage("dropEnrollment " + enrollmentId);
+    }
+
+    /////////////////////////////
+    // Section Command Sending //
+    /////////////////////////////
+
     public void addSection(SectionDTO section) {
         sendMessage("addSection " + asJsonString(section));
     }
@@ -58,13 +78,9 @@ public class GradebookServiceProxy {
         sendMessage("deleteSection " + sectionId);
     }
 
-    public void enrollInCourse(EnrollmentDTO enrollment){
-        sendMessage("addEnrollment "+ asJsonString(enrollment));
-    }
-
-    public void dropCourse(int enrollmentId){
-        sendMessage("dropEnrollment " + enrollmentId);
-    }
+    //////////////////////////
+    // User Command Sending //
+    //////////////////////////
 
     public void addUser(UserDTO user){
         sendMessage("addUser " + asJsonString(user));
@@ -76,6 +92,10 @@ public class GradebookServiceProxy {
     public void deleteUser(int userId){
         sendMessage("deleteUser " + userId);
     }
+
+    ////////////////////////////
+    // Command Receive Switch //
+    ////////////////////////////
 
     @RabbitListener(queues = "registrar_service")
     public void receiveFromGradebook(String message)  {
