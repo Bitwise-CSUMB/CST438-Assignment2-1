@@ -1,6 +1,5 @@
 package com.cst438.service;
 
-import com.cst438.domain.Assignment;
 import com.cst438.domain.AssignmentRepository;
 import com.cst438.domain.Course;
 import com.cst438.domain.CourseRepository;
@@ -10,12 +9,12 @@ import com.cst438.domain.Section;
 import com.cst438.domain.SectionRepository;
 import com.cst438.domain.User;
 import com.cst438.domain.UserRepository;
-import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.CourseDTO;
 import com.cst438.dto.EnrollmentDTO;
 import com.cst438.domain.Term;
 import com.cst438.domain.TermRepository;
 import com.cst438.dto.SectionDTO;
+import com.cst438.dto.UserDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -105,73 +104,44 @@ public class RegistrarServiceProxy {
                     }
                 }
             } else if (parts[0].contains("Section")) {
-                SectionDTO sectionDTO = fromJsonString(parts[1], SectionDTO.class);
-                Section s = sectionRepository.findById(sectionDTO.secNo()).orElse(null);
-                if (s == null) {
-                    switch (parts[0]) {
-                        case "addSection":
-                            s.setSectionNo(sectionDTO.secNo());
-                            Term t = termRepository.findByYearAndSemester(sectionDTO.year(), sectionDTO.semester());
-                            s.setTerm(t);
-                            s.setSecId(sectionDTO.secId());
-                            s.setBuilding(sectionDTO.building());
-                            s.setRoom(sectionDTO.room());
-                            s.setTimes(sectionDTO.times());
-                            s.setInstructor_email(sectionDTO.instructorEmail());
-                            Course c = courseRepository.findById(sectionDTO.courseId()).orElse(null);
-                            s.setCourse(c);
-                            sectionRepository.save(s);
-                            break;
-                        default:
-                            System.out.println("Option not implemented: " + parts[0]);
-                    }
+                if (parts[0].equals("deleteSection")) {
+                    Section s = sectionRepository.findById(Integer.parseInt(parts[1])).orElse(null);
                 } else {
-                    switch (parts[0]) {
-                        case "updateSection":
-                            s.setSecId(sectionDTO.secId());
-                            s.setBuilding(sectionDTO.building());
-                            s.setRoom(sectionDTO.room());
-                            s.setTimes(sectionDTO.times());
-                            if (sectionDTO.instructorEmail() == null || sectionDTO.instructorEmail().isEmpty()) {
-                                s.setInstructor_email(sectionDTO.instructorEmail());
-                            }
-                            break;
-                        case "deleteSection":
-                            sectionRepository.delete(s);
-                            break;
-                        default:
-                            System.out.println("Option not implemented: " + parts[0]);
-                    }
-                }
-            } else if (parts[0].contains("Assignment")) {
-                AssignmentDTO assignmentDTO = fromJsonString(parts[1], AssignmentDTO.class);
-                Assignment a = assignmentRepository.findByAssignmentId(assignmentDTO.id());
-                if (a == null) {
-                    switch (parts[0]) {
-                        case "addAssignment":
-                            a.setTitle(assignmentDTO.title());
-                            java.sql.Date sqlDueDate = java.sql.Date.valueOf(assignmentDTO.dueDate());
-                            a.setDueDate(sqlDueDate);
-                            Section s = sectionRepository.findById(assignmentDTO.secNo()).orElse(null);
-                            a.setSection(s);
-                            assignmentRepository.save(a);
-                            break;
-                        default:
-                            System.out.println("Option not implemented: " + parts[0]);
-                    }
-                } else {
-                    switch (parts[0]) {
-                        case "updateAssignment":
-                            a.setTitle(assignmentDTO.title());
-                            java.sql.Date sqlDueDate = java.sql.Date.valueOf(assignmentDTO.dueDate());
-                            a.setDueDate(sqlDueDate);
-                            assignmentRepository.save(a);
-                            break;
-                        case "deleteAssignment":
-                            assignmentRepository.delete(a);
-                            break;
-                        default:
-                            System.out.println("Option not implemented: " + parts[0]);
+                    SectionDTO sectionDTO = fromJsonString(parts[1], SectionDTO.class);
+                    Section s = sectionRepository.findById(sectionDTO.secNo()).orElse(null);
+                    if (s == null) {
+                        switch (parts[0]) {
+                            case "addSection":
+                                Section section = new Section();
+                                section.setSectionNo(sectionDTO.secNo());
+                                Term t = termRepository.findByYearAndSemester(sectionDTO.year(), sectionDTO.semester());
+                                section.setTerm(t);
+                                section.setSecId(sectionDTO.secId());
+                                section.setBuilding(sectionDTO.building());
+                                section.setRoom(sectionDTO.room());
+                                section.setTimes(sectionDTO.times());
+                                section.setInstructor_email(sectionDTO.instructorEmail());
+                                Course c = courseRepository.findById(sectionDTO.courseId()).orElse(null);
+                                section.setCourse(c);
+                                sectionRepository.save(section);
+                                break;
+                            default:
+                                System.out.println("Option not implemented: " + parts[0]);
+                        }
+                    } else {
+                        switch (parts[0]) {
+                            case "updateSection":
+                                s.setSecId(sectionDTO.secId());
+                                s.setBuilding(sectionDTO.building());
+                                s.setRoom(sectionDTO.room());
+                                s.setTimes(sectionDTO.times());
+                                if (sectionDTO.instructorEmail() == null || sectionDTO.instructorEmail().isEmpty()) {
+                                    s.setInstructor_email(sectionDTO.instructorEmail());
+                                }
+                                break;
+                            default:
+                                System.out.println("Option not implemented: " + parts[0]);
+                        }
                     }
                 }
             } else if (parts[0].contains("Enrollment")) {
@@ -193,14 +163,34 @@ public class RegistrarServiceProxy {
                 }
             } else if (parts[0].contains("User")) {
                 switch (parts[0]) {
-                    case "addUser":
+                    case "addUser": {
+                        newEntityFromDTO(
+                            new User(),                              // EntityType newEntity
+                            fromJsonString(parts[1], UserDTO.class), // DTOType dto
+                            UserDTO::id,                             // Function<DTOType, KeyType> idSupplier
+                            User::setId,                             // BiConsumer<DTOType, KeyType> idConsumer
+                            RegistrarServiceProxy::fillUserFromDTO,  // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                            userRepository                           // CrudRepository<EntityType, KeyType> repository
+                        );
                         break;
-                    case "updateUser":
+                    }
+                    case "updateUser": {
+                        updateEntityFromDTO(
+                            "User",                                  // String entityName,
+                            fromJsonString(parts[1], UserDTO.class), // DTOType dto,
+                            UserDTO::id,                             // Function<DTOType, KeyType> idSupplier,
+                            userRepository,                          // CrudRepository<EntityType, KeyType> repository,
+                            RegistrarServiceProxy::fillUserFromDTO   // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                        );
                         break;
-                    case "deleteUser":
+                    }
+                    case "deleteUser": {
+                        userRepository.deleteById(Integer.valueOf(parts[1], 10));
                         break;
-                    default:
+                    }
+                    default: {
                         System.out.println("Option not implemented: " + parts[0]);
+                    }
                 }
             } else {
                 System.out.println("Option not implemented: " + parts[0]);
@@ -218,6 +208,14 @@ public class RegistrarServiceProxy {
     private static boolean fillCourseFromDTO(Course course, CourseDTO enrollmentDTO) {
         course.setTitle(enrollmentDTO.title());
         course.setCredits(enrollmentDTO.credits());
+        return true;
+    }
+
+    private static boolean fillUserFromDTO(User user, UserDTO userDTO) {
+        user.setName(userDTO.name());
+        user.setEmail(userDTO.email());
+        // Password not part of the DTO
+        user.setType(userDTO.type());
         return true;
     }
 
