@@ -60,6 +60,10 @@ public class RegistrarServiceProxy {
         sendMessage("updateEnrollment " + asJsonString(enrollmentDTO));
     }
 
+    ////////////////////////////
+    // Command Receive Switch //
+    ////////////////////////////
+
     @RabbitListener(queues = "gradebook_service")
     public void receiveFromRegistrar(String message) {
         try {
@@ -119,35 +123,28 @@ public class RegistrarServiceProxy {
                 // Section Commands //
                 //////////////////////
                 case "addSection": {
-                    SectionDTO sectionDTO = fromJsonString(parts[1], SectionDTO.class);
-                    Section section = new Section();
-                    section.setSectionNo(sectionDTO.secNo());
-                    Term t = termRepository.findByYearAndSemester(sectionDTO.year(), sectionDTO.semester());
-                    section.setTerm(t);
-                    section.setSecId(sectionDTO.secId());
-                    section.setBuilding(sectionDTO.building());
-                    section.setRoom(sectionDTO.room());
-                    section.setTimes(sectionDTO.times());
-                    section.setInstructor_email(sectionDTO.instructorEmail());
-                    Course c = courseRepository.findById(sectionDTO.courseId()).orElse(null);
-                    section.setCourse(c);
-                    sectionRepository.save(section);
+                    newEntityFromDTO(
+                        new Section(),                              // EntityType newEntity
+                        fromJsonString(parts[1], SectionDTO.class), // DTOType dto
+                        SectionDTO::secNo,                          // Function<DTOType, KeyType> idSupplier
+                        Section::setSectionNo,                      // BiConsumer<DTOType, KeyType> idConsumer
+                        this::fillSectionFromDTO,                   // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                        sectionRepository                           // CrudRepository<EntityType, KeyType> repository
+                    );
                     break;
                 }
                 case "updateSection": {
-                    SectionDTO sectionDTO = fromJsonString(parts[1], SectionDTO.class);
-                    Section s = sectionRepository.findById(sectionDTO.secNo()).orElse(null);
-                    s.setSecId(sectionDTO.secId());
-                    s.setBuilding(sectionDTO.building());
-                    s.setRoom(sectionDTO.room());
-                    s.setTimes(sectionDTO.times());
-                    if (sectionDTO.instructorEmail() == null || sectionDTO.instructorEmail().isEmpty()) {
-                        s.setInstructor_email(sectionDTO.instructorEmail());
-                    }
+                    updateEntityFromDTO(
+                        "Section",                                  // String entityName,
+                        fromJsonString(parts[1], SectionDTO.class), // DTOType dto,
+                        SectionDTO::secNo,                          // Function<DTOType, KeyType> idSupplier,
+                        sectionRepository,                          // CrudRepository<EntityType, KeyType> repository,
+                        this::fillSectionFromDTO                    // BiFunction<EntityType, DTOType, Boolean> fillFunc
+                    );
                     break;
                 }
                 case "deleteSection": {
-                    Section s = sectionRepository.findById(Integer.parseInt(parts[1])).orElse(null);
+                    sectionRepository.deleteById(Integer.valueOf(parts[1], 10));
                     break;
                 }
                 ///////////////////
@@ -202,14 +199,6 @@ public class RegistrarServiceProxy {
         return true;
     }
 
-    private static boolean fillUserFromDTO(User user, UserDTO userDTO) {
-        user.setName(userDTO.name());
-        user.setEmail(userDTO.email());
-        user.setPassword(""); // Password intentionally not mirrored - grade book service doesn't need to know it
-        user.setType(userDTO.type());
-        return true;
-    }
-
     private boolean fillEnrollmentFromDTO(Enrollment enrollment, EnrollmentDTO enrollmentDTO) {
 
         // Update grade
@@ -227,6 +216,38 @@ public class RegistrarServiceProxy {
         if (section == null) return false;
         enrollment.setSection(section);
 
+        return true;
+    }
+
+    private boolean fillSectionFromDTO(Section section, SectionDTO sectionDTO) {
+
+        // Update course
+        final Course course = fetchEntity("Course", courseRepository::findById, sectionDTO, SectionDTO::courseId);
+        if (course == null) return false;
+        section.setCourse(course);
+
+        // Update term
+        final Term term = termRepository.findByYearAndSemester(sectionDTO.year(), sectionDTO.semester());
+        if (term == null) {
+            System.out.println("Term with year=" + sectionDTO.year() + " and semester="
+                + sectionDTO.semester() + " not found");
+            return false;
+        }
+        section.setTerm(term);
+
+        section.setSecId(sectionDTO.secId());                      // Update section id
+        section.setBuilding(sectionDTO.building());                // Update building
+        section.setRoom(sectionDTO.room());                        // Update room
+        section.setTimes(sectionDTO.times());                      // Update times
+        section.setInstructor_email(sectionDTO.instructorEmail()); // Update instructor email
+        return true;
+    }
+
+    private static boolean fillUserFromDTO(User user, UserDTO userDTO) {
+        user.setName(userDTO.name());
+        user.setEmail(userDTO.email());
+        user.setPassword(""); // Password intentionally not mirrored - grade book service doesn't need to know it
+        user.setType(userDTO.type());
         return true;
     }
 
@@ -294,7 +315,7 @@ public class RegistrarServiceProxy {
         final Optional<EntityType> optional = findFunc.apply(id);
 
         if (optional.isEmpty()) {
-            System.out.println(name + " with id " + id + " not found");
+            System.out.println(name + " with id=" + id + " not found");
             return null;
         }
 
