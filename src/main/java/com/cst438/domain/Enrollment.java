@@ -15,7 +15,7 @@ public class Enrollment {
 
     @Id
     @Column(name = "enrollment_id")
-    int enrollmentId;
+    private int enrollmentId;
 
     // add additional attribute for grade
     private String grade;
@@ -32,7 +32,7 @@ public class Enrollment {
 
     // One to Many relationship between enrollment and grade
     @OneToMany(mappedBy = "enrollment", cascade = CascadeType.REMOVE)
-    List<Grade> grades;
+    private List<Grade> grades;
 
     public Enrollment() {}
 

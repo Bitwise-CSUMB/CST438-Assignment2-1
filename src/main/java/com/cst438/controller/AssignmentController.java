@@ -308,7 +308,6 @@ public class AssignmentController {
                     a.getSection().getCourse().getCourseId(), a.getSection().getSecId(),
                     a.getSection().getSectionNo()));
         }
-        registrarServiceProxy.testMessage("woooooop testy");
         return dto_list;
     }
 }

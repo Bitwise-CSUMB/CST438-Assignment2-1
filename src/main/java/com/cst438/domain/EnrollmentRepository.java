@@ -1,7 +1,10 @@
 package com.cst438.domain;
 
+//import com.cst438.dto.EnrollmentDTO;
+//import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+//import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,4 +21,19 @@ public interface EnrollmentRepository extends CrudRepository<Enrollment, Integer
 
     @Query("select e from Enrollment e where e.section.sectionNo=:sectionNo and e.user.id=:studentId")
     Enrollment findEnrollmentBySectionNoAndStudentId(int sectionNo, int studentId);
+
+    // @Transactional
+    // @Modifying
+    // @Query(
+    //     nativeQuery = true,
+    //     value = """
+    //         insert into enrollment (enrollment_id, grade, section_no, user_id) values (
+    //             :#{#enrollmentDTO.enrollmentId()},
+    //             :#{#enrollmentDTO.grade()},
+    //             :#{#enrollmentDTO.sectionNo()},
+    //             :#{#enrollmentDTO.studentId()}
+    //         )
+    //     """
+    // )
+    // Enrollment insertDTO(EnrollmentDTO enrollmentDTO);
 }
