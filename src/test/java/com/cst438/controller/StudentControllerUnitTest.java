@@ -36,9 +36,6 @@ public class StudentControllerUnitTest {
     SectionRepository sectionRepository;
 
     @Autowired
-    AssignmentRepository assignmentRepository;
-
-    @Autowired
     private EnrollmentRepository enrollmentRepository;
 
     // Unit Test #6 - Student enrolls into a section

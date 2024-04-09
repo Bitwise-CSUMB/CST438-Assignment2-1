@@ -42,14 +42,11 @@ public class Section {
     @OneToMany(mappedBy="section")
     List<Enrollment> enrollments;
 
-    @OneToMany(mappedBy="section")
-    List<Assignment> assignments;
-
     public Section() {}
 
     public Section(
         int sectionNo, Course course, Term term, int secId, String building, String room, String times,
-        String instructorEmail, List<Enrollment> enrollments, List<Assignment> assignments)
+        String instructorEmail, List<Enrollment> enrollments)
     {
         this.sectionNo = sectionNo;
         this.course = course;
@@ -60,7 +57,6 @@ public class Section {
         this.times = times;
         this.instructorEmail = instructorEmail;
         this.enrollments = enrollments;
-        this.assignments = assignments;
     }
 
     public int getSectionNo() {
@@ -129,9 +125,5 @@ public class Section {
 
     public List<Enrollment> getEnrollments() {
         return enrollments;
-    }
-
-    public List<Assignment> getAssignments() {
-        return assignments;
     }
 }

@@ -2,16 +2,15 @@ package com.cst438.controller;
 
 import com.cst438.domain.*;
 import com.cst438.dto.CourseDTO;
-import com.cst438.dto.SectionDTO;
+import com.cst438.service.GradebookServiceProxy;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /*
  * Controller for managing courses and sections.
@@ -21,6 +20,9 @@ import java.util.List;
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 public class CourseController {
+
+    @Autowired
+    GradebookServiceProxy gradebookServiceProxy;
 
     @Autowired
     CourseRepository courseRepository;
@@ -43,11 +45,15 @@ public class CourseController {
         c.setTitle(course.title());
         c.setCourseId(course.courseId());
         courseRepository.save(c);
-        return new CourseDTO(
-                c.getCourseId(),
-                c.getTitle(),
-                c.getCredits()
+
+        CourseDTO dto = new CourseDTO(
+            c.getCourseId(),
+            c.getTitle(),
+            c.getCredits()
         );
+
+        gradebookServiceProxy.addCourse(dto);
+        return dto;
     }
 
     // ADMIN function to update a course
@@ -60,22 +66,27 @@ public class CourseController {
             c.setTitle(course.title());
             c.setCredits(course.credits());
             courseRepository.save(c);
-            return new CourseDTO(
-                    c.getCourseId(),
-                    c.getTitle(),
-                    c.getCredits()
+
+            CourseDTO dto = new CourseDTO(
+                c.getCourseId(),
+                c.getTitle(),
+                c.getCredits()
             );
+
+            gradebookServiceProxy.updateCourse(dto);
+            return dto;
         }
     }
 
     // ADMIN function to delete a course
     // delete will fail if the course has sections
-    @DeleteMapping("/courses/{courseid}")
-    public void deleteCourse(@PathVariable String courseid) {
-        Course c = courseRepository.findById(courseid).orElse(null);
+    @DeleteMapping("/courses/{courseId}")
+    public void deleteCourse(@PathVariable String courseId) {
+        Course c = courseRepository.findById(courseId).orElse(null);
         // if course does not exist, do nothing.
         if (c!=null) {
             courseRepository.delete(c);
+            gradebookServiceProxy.deleteCourse(courseId);
         }
     }
 
@@ -93,6 +104,4 @@ public class CourseController {
     public List<Term> getAllTerms() {
         return termRepository.findAllByOrderByTermIdDesc();
     }
-
-
 }
