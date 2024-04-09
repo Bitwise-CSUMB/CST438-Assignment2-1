@@ -100,7 +100,7 @@ public class GradebookServiceProxy {
     @RabbitListener(queues = "registrar_service")
     public void receiveFromGradebook(String message)  {
         try {
-            System.out.println("Receive from Gradebook " + message);
+            //System.out.println("Receive from Gradebook " + message);
             String[] parts = message.split(" ", 2);
             switch (parts[0]) {
                 case "updateEnrollment":
@@ -117,15 +117,15 @@ public class GradebookServiceProxy {
                     }
                     break;
                 default:
-                    System.out.println("Option not implemented: " + parts[0]);
+                    System.out.println("Command not implemented: " + parts[0]);
             }
         } catch (Exception e) {
-            System.out.println("Exception in receivedFromGradebook " + e.getMessage());
+            System.out.println("Exception in receiveFromGradebook: " + e.getMessage());
         }
     } 
 
     private void sendMessage(String s) {
-        System.out.println("Registrar to Gradebook " + s);
+        //System.out.println("Registrar to Gradebook " + s);
         rabbitTemplate.convertAndSend(gradebookServiceQueue.getName(), s);
     }
 
