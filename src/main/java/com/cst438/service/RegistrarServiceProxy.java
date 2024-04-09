@@ -1,6 +1,5 @@
 package com.cst438.service;
 
-import com.cst438.domain.AssignmentRepository;
 import com.cst438.domain.Course;
 import com.cst438.domain.CourseRepository;
 import com.cst438.domain.Enrollment;
@@ -36,9 +35,6 @@ public class RegistrarServiceProxy {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    private AssignmentRepository assignmentRepository;
 
     @Autowired
     private CourseRepository courseRepository;
@@ -218,7 +214,7 @@ public class RegistrarServiceProxy {
     private static boolean fillUserFromDTO(User user, UserDTO userDTO) {
         user.setName(userDTO.name());
         user.setEmail(userDTO.email());
-        // Password not part of the DTO
+        user.setPassword(""); // Password not part of the DTO
         user.setType(userDTO.type());
         return true;
     }
