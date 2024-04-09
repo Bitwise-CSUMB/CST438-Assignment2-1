@@ -67,7 +67,7 @@ public class RegistrarServiceProxy {
     @RabbitListener(queues = "gradebook_service")
     public void receiveFromRegistrar(String message) {
         try {
-            System.out.println("Receive from Registrar " + message);
+            //System.out.println("Receive from Registrar " + message);
             String[] parts = message.split(" ", 2);
             switch (parts[0]) {
                 /////////////////////
@@ -184,12 +184,12 @@ public class RegistrarServiceProxy {
             }
         }
         catch (Exception e) {
-            System.out.println("Exception in receivedFromRegistrar " + e.getMessage());
+            System.out.println("Exception in receiveFromRegistrar: " + e.getMessage());
         }
     }
 
     private void sendMessage(String s) {
-        System.out.println("Gradebook to Registrar " + s);
+        //System.out.println("Gradebook to Registrar " + s);
         rabbitTemplate.convertAndSend(registrarServiceQueue.getName(), s);
     }
 
