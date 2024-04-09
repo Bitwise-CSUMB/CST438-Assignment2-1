@@ -13,6 +13,9 @@ import com.cst438.domain.UserRepository;
 import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.CourseDTO;
 import com.cst438.dto.EnrollmentDTO;
+import com.cst438.domain.Term;
+import com.cst438.domain.TermRepository;
+import com.cst438.dto.SectionDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -49,6 +52,9 @@ public class RegistrarServiceProxy {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TermRepository termRepository;
 
     @Bean
     public Queue createQueue() {
@@ -99,42 +105,74 @@ public class RegistrarServiceProxy {
                     }
                 }
             } else if (parts[0].contains("Section")) {
-                switch (parts[0]) {
-                    case "addSection":
-                        // example "addSection {"secNo":1000,"year":2023,"semester":"Fall","courseId":"cst363","secId":3
-                        // ,"building":"052","room":"102","times":"M W 10:00-11:50","instructorName":"david wisneski","instructorEmail":"dwisneski@csumb.edu"}"
-                        break;
-                    case "updateSection":
-                        // example "updateSection {"secNo":3,"year":2023,"semester":"Fall","courseId":"cst363","secId":3
-                        // ,"building":"109","room":"102","times":"M W 10:00-11:50","instructorName":"david wisneski","instructorEmail":"jgross@csumb.edu"}"
-                        break;
-                    case "deleteSection":
-                        // example "deleteSection 3"
-                        break;
-                    default:
-                        System.out.println("Option not implemented: " + parts[0]);
+                SectionDTO sectionDTO = fromJsonString(parts[1], SectionDTO.class);
+                Section s = sectionRepository.findById(sectionDTO.secNo()).orElse(null);
+                if (s == null) {
+                    switch (parts[0]) {
+                        case "addSection":
+                            s.setSectionNo(sectionDTO.secNo());
+                            Term t = termRepository.findByYearAndSemester(sectionDTO.year(), sectionDTO.semester());
+                            s.setTerm(t);
+                            s.setSecId(sectionDTO.secId());
+                            s.setBuilding(sectionDTO.building());
+                            s.setRoom(sectionDTO.room());
+                            s.setTimes(sectionDTO.times());
+                            s.setInstructor_email(sectionDTO.instructorEmail());
+                            Course c = courseRepository.findById(sectionDTO.courseId()).orElse(null);
+                            s.setCourse(c);
+                            sectionRepository.save(s);
+                            break;
+                        default:
+                            System.out.println("Option not implemented: " + parts[0]);
+                    }
+                } else {
+                    switch (parts[0]) {
+                        case "updateSection":
+                            s.setSecId(sectionDTO.secId());
+                            s.setBuilding(sectionDTO.building());
+                            s.setRoom(sectionDTO.room());
+                            s.setTimes(sectionDTO.times());
+                            if (sectionDTO.instructorEmail() == null || sectionDTO.instructorEmail().isEmpty()) {
+                                s.setInstructor_email(sectionDTO.instructorEmail());
+                            }
+                            break;
+                        case "deleteSection":
+                            sectionRepository.delete(s);
+                            break;
+                        default:
+                            System.out.println("Option not implemented: " + parts[0]);
+                    }
                 }
             } else if (parts[0].contains("Assignment")) {
                 AssignmentDTO assignmentDTO = fromJsonString(parts[1], AssignmentDTO.class);
                 Assignment a = assignmentRepository.findByAssignmentId(assignmentDTO.id());
                 if (a == null) {
-                    System.out.println("Error receiveFromRegistrar Assignment not found " + assignmentDTO.id());
-                }
-                switch (parts[0]) {
-                    case "addAssignment":
-                        assignmentRepository.save(a);
-                        break;
-                    case "updateAssignment":
-                        a.setTitle(assignmentDTO.title());
-                        java.sql.Date sqlDueDate = java.sql.Date.valueOf(assignmentDTO.dueDate());
-                        a.setDueDate(sqlDueDate);
-                        assignmentRepository.save(a);
-                        break;
-                    case "deleteAssignment":
-                        assignmentRepository.delete(a);
-                        break;
-                    default:
-                        System.out.println("Option not implemented: " + parts[0]);
+                    switch (parts[0]) {
+                        case "addAssignment":
+                            a.setTitle(assignmentDTO.title());
+                            java.sql.Date sqlDueDate = java.sql.Date.valueOf(assignmentDTO.dueDate());
+                            a.setDueDate(sqlDueDate);
+                            Section s = sectionRepository.findById(assignmentDTO.secNo()).orElse(null);
+                            a.setSection(s);
+                            assignmentRepository.save(a);
+                            break;
+                        default:
+                            System.out.println("Option not implemented: " + parts[0]);
+                    }
+                } else {
+                    switch (parts[0]) {
+                        case "updateAssignment":
+                            a.setTitle(assignmentDTO.title());
+                            java.sql.Date sqlDueDate = java.sql.Date.valueOf(assignmentDTO.dueDate());
+                            a.setDueDate(sqlDueDate);
+                            assignmentRepository.save(a);
+                            break;
+                        case "deleteAssignment":
+                            assignmentRepository.delete(a);
+                            break;
+                        default:
+                            System.out.println("Option not implemented: " + parts[0]);
+                    }
                 }
             } else if (parts[0].contains("Enrollment")) {
                 switch (parts[0]) {
