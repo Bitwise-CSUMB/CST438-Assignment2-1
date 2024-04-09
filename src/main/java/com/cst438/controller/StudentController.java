@@ -146,6 +146,7 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Drop deadline has been exceeded");
         }
 
+        enrollmentRepository.delete(enrollment);
         gradebookServiceProxy.dropCourse(enrollmentId);
     }
 }
