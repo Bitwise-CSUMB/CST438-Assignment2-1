@@ -4,6 +4,8 @@ import com.cst438.domain.*;
 import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.AssignmentStudentDTO;
 import com.cst438.dto.GradeDTO;
+
+import java.security.Principal;
 import java.sql.Date;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
@@ -21,16 +23,19 @@ import java.util.Optional;
 public class AssignmentController {
 
     @Autowired
-    AssignmentRepository assignmentRepository;
+    private AssignmentRepository assignmentRepository;
 
     @Autowired
-    GradeRepository gradeRepository;
+    private EnrollmentRepository enrollmentRepository;
 
     @Autowired
-    EnrollmentRepository enrollmentRepository;
+    private GradeRepository gradeRepository;
 
     @Autowired
-    SectionRepository sectionRepository;
+    private SectionRepository sectionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // instructor lists assignments for a section. Assignments ordered by due date.
     // logged in user must be the instructor for the section
@@ -224,14 +229,17 @@ public class AssignmentController {
     // student must be enrolled in the section
     @GetMapping("/assignments")
     public List<AssignmentStudentDTO> getStudentAssignments(
-            @RequestParam("studentId") int studentId,
             @RequestParam("year") int year,
-            @RequestParam("semester") String semester) {
-
+            @RequestParam("semester") String semester,
+            Principal principal)
+    {
         // return a list of assignments and (if they exist) the assignment grade
         // for all sections that the student is enrolled for the given year and semester
         // hint: use the assignment repository method
         // findByStudentIdAndYearAndSemesterOrderByDueDate
+
+        final User user = ControllerUtils.validateStudent(userRepository, principal);
+        final int studentId = user.getId();
 
         List<Assignment> assignments = assignmentRepository.findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
         if (assignments.isEmpty()) {

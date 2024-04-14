@@ -40,21 +40,6 @@ public class StudentController {
     @Autowired
     private UserRepository userRepository;
 
-    private User validateStudent(final Principal principal) {
-
-        final User user = userRepository.findByEmail(principal.getName());
-
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown user");
-        }
-
-        if (!user.getType().equals("STUDENT")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user (not a STUDENT)");
-        }
-
-        return user;
-    }
-
     // student gets transcript showing list of all enrollments
     // studentId will be temporary until Login security is implemented
     // example URL  /transcript?studentId=19803
@@ -67,7 +52,7 @@ public class StudentController {
         // user must be a student
         // hint: use enrollment repository method findEnrollmentByStudentIdOrderByTermId
 
-        final User user = validateStudent(principal);
+        final User user = ControllerUtils.validateStudent(userRepository, principal);
         final int studentId = user.getId();
 
         return enrollmentRepository.findEnrollmentsByStudentIdOrderByTermId(studentId)
@@ -88,7 +73,7 @@ public class StudentController {
     {
         // hint: use enrollment repository method findByYearAndSemesterOrderByCourseId
 
-        final User user = validateStudent(principal);
+        final User user = ControllerUtils.validateStudent(userRepository, principal);
         final int studentId = user.getId();
 
         return enrollmentRepository.findByYearAndSemesterOrderByCourseId(year, semester, studentId)
@@ -112,7 +97,7 @@ public class StudentController {
         // create a new enrollment entity and save.  The enrollment grade will
         // be NULL until instructor enters final grades for the course.
 
-        final User user = validateStudent(principal);
+        final User user = ControllerUtils.validateStudent(userRepository, principal);
         final int studentId = user.getId();
 
         final Section section = sectionRepository.findById(sectionNo).orElseThrow(() ->
