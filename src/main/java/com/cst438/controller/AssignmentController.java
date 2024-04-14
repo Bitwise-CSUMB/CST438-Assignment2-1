@@ -228,6 +228,7 @@ public class AssignmentController {
     // student lists their assignments/grades for an enrollment ordered by due date
     // student must be enrolled in the section
     @GetMapping("/assignments")
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_STUDENT')")
     public List<AssignmentStudentDTO> getStudentAssignments(
             @RequestParam("year") int year,
             @RequestParam("semester") String semester,
