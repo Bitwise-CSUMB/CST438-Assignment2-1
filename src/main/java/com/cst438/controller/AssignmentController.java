@@ -181,7 +181,7 @@ public class AssignmentController {
             .findEnrollmentsBySectionNoOrderByStudentName(assignment.getSection().getSectionNo());
 
         final List<GradeDTO> grades = new ArrayList<>();
-        for (Enrollment enrollment : enrollments) {
+        for (final Enrollment enrollment : enrollments) {
 
             Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(
                 enrollment.getEnrollmentId(), assignment.getAssignmentId());
@@ -190,7 +190,6 @@ public class AssignmentController {
                 grade = new Grade();
                 grade.setAssignment(assignment);
                 grade.setEnrollment(enrollment);
-                grade.setScore(null);
                 grade = gradeRepository.save(grade);
             }
 
@@ -273,23 +272,21 @@ public class AssignmentController {
     // TODO - Unused
     @GetMapping("/allassignments")
     public List<AssignmentDTO> getAllAssignments() {
-        List<Assignment> assignments = assignmentRepository.findAllAssignments();
-        List<AssignmentDTO> dto_list = new ArrayList<>();
-        for (Assignment a : assignments) {
-            dto_list.add(new AssignmentDTO(a.getAssignmentId(), a.getTitle(), a.getDueDate().toString(),
-                    a.getSection().getCourse().getCourseId(), a.getSection().getSecId(),
-                    a.getSection().getSectionNo()));
-        }
-        return dto_list;
+        return assignmentRepository.findAllAssignments().stream()
+            .map(AssignmentDTO::fromEntity)
+            .collect(Collectors.toList());
     }
 
-    private AssignmentDTO updateAssignmentTitleAndDueDate(Assignment assignment, final AssignmentDTO assignmentDTO) {
+    private AssignmentDTO updateAssignmentTitleAndDueDate(
+        final Assignment assignment,
+        final AssignmentDTO assignmentDTO)
+    {
         assignment.setTitle(assignmentDTO.title());
         assignment.setDueDate(parseDueDate(assignmentDTO));
         return AssignmentDTO.fromEntity(assignmentRepository.save(assignment));
     }
 
-    private static java.sql.Date parseDueDate(AssignmentDTO assignmentDTO) {
+    private static java.sql.Date parseDueDate(final AssignmentDTO assignmentDTO) {
         try {
             // Parse the string directly into a java.sql.Date object
             return java.sql.Date.valueOf(assignmentDTO.dueDate());

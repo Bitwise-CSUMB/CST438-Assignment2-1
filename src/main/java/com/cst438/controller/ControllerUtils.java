@@ -72,7 +72,7 @@ public class ControllerUtils {
         final SectionRepository sectionRepository,
         final int sectionNo)
     {
-        return validateInstructorAndInstructorForSection(userRepository, principal,
+        return validateInstructorAndInstructorForSection(userRepository, principal, () ->
             sectionRepository.findById(sectionNo).orElseThrow(ControllerUtils::unknownSectionErr));
     }
 
