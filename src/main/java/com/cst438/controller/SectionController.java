@@ -30,7 +30,7 @@ public class SectionController {
 
 
     // ADMIN function to create a new section
-    @PostMapping("/sections")
+    @PostMapping("/sections") // SectionAdd.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public SectionDTO addSection(@RequestBody SectionDTO section) {
 
@@ -80,7 +80,7 @@ public class SectionController {
     }
 
     // ADMIN function to update a section
-    @PutMapping("/sections")
+    @PutMapping("/sections") // SectionUpdate.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public void updateSection(@RequestBody SectionDTO section) {
         // can only change instructor email, sec_id, building, room, times, start, end dates
@@ -108,7 +108,7 @@ public class SectionController {
 
     // ADMIN function to create a delete section
     // delete will fail there are related assignments or enrollments
-    @DeleteMapping("/sections/{sectionno}")
+    @DeleteMapping("/sections/{sectionno}") // SectionsView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public void deleteSection(@PathVariable int sectionno) {
         Section s = sectionRepository.findById(sectionno).orElse(null);
@@ -122,7 +122,7 @@ public class SectionController {
     // example URL   /course/cst363/sections?year=2024&semester=Spring
     // also specify partial courseId   /course/cst/sections?year=2024&semester=Spring
     // TODO - Any logged in user
-    @GetMapping("/courses/{courseId}/sections")
+    @GetMapping("/courses/{courseId}/sections") // SectionsView.js
     public List<SectionDTO> getSections(
             @PathVariable("courseId") String courseId,
             @RequestParam("year") int year ,
@@ -157,7 +157,7 @@ public class SectionController {
 
     // get Sections for an instructor
     // example URL  /sections?instructorEmail=dwisneski@csumb.edu&year=2024&semester=Spring
-    @GetMapping("/sections")
+    @GetMapping("/sections") // InstructorSectionsView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public List<SectionDTO> getSectionsForInstructor(
             @RequestParam("year") int year ,
@@ -192,7 +192,7 @@ public class SectionController {
     }
 	
     // TODO - Any logged in user
-    @GetMapping("/sections/open")
+    @GetMapping("/sections/open") // CourseEnroll.js
     public List<SectionDTO> getOpenSectionsForEnrollment() {
 
         List<Section> sections = sectionRepository.findByOpenOrderByCourseIdSectionId();

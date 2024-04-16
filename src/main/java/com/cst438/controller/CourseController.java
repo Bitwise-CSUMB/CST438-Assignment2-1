@@ -34,7 +34,7 @@ public class CourseController {
 
 
     // ADMIN function to create a new course
-    @PostMapping("/courses")
+    @PostMapping("/courses") // CoursesView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public CourseDTO addCourse(@RequestBody CourseDTO course) {
         Course c = new Course();
@@ -50,7 +50,7 @@ public class CourseController {
     }
 
     // ADMIN function to update a course
-    @PutMapping("/courses")
+    @PutMapping("/courses") // CoursesView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public CourseDTO updateCourse(@RequestBody CourseDTO course) {
         Course c = courseRepository.findById(course.courseId()).orElse(null);
@@ -70,7 +70,7 @@ public class CourseController {
 
     // ADMIN function to delete a course
     // delete will fail if the course has sections
-    @DeleteMapping("/courses/{courseid}")
+    @DeleteMapping("/courses/{courseid}") // CoursesView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public void deleteCourse(@PathVariable String courseid) {
         Course c = courseRepository.findById(courseid).orElse(null);
@@ -81,7 +81,7 @@ public class CourseController {
     }
 
     // TODO - Any logged in user
-    @GetMapping("/courses")
+    @GetMapping("/courses") // CoursesView.js
     public List<CourseDTO> getAllCourses() {
         List<Course> courses = courseRepository.findAllByOrderByCourseIdAsc();
         List<CourseDTO> dto_list = new ArrayList<>();
@@ -92,8 +92,8 @@ public class CourseController {
     }
 
     // TODO - Unused
-    @GetMapping("/terms")
-    public List<Term> getAllTerms() {
-        return termRepository.findAllByOrderByTermIdDesc();
-    }
+//    @GetMapping("/terms")
+//    public List<Term> getAllTerms() {
+//        return termRepository.findAllByOrderByTermIdDesc();
+//    }
 }

@@ -23,7 +23,7 @@ public class LoginController {
 	@Autowired
 	UserRepository userRepository;
 
-	@GetMapping("/login")
+	@GetMapping("/login") // Login.js
 	public LoginDTO token(Authentication authentication) {
 		String name = authentication.getName();
 		System.out.println("login authentication "+name);

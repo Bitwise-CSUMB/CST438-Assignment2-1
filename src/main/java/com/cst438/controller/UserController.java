@@ -28,7 +28,7 @@ public class UserController {
 
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    @GetMapping("/users")
+    @GetMapping("/users") // UsersView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public List<UserDTO> findAllUsers() {
 
@@ -40,7 +40,7 @@ public class UserController {
         return userDTO_list;
     }
 
-    @PostMapping("/users")
+    @PostMapping("/users") // UsersView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public UserDTO createUser(@RequestBody UserDTO userDTO) {
         User user = new User();
@@ -63,7 +63,7 @@ public class UserController {
         return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getType());
     }
 
-    @PutMapping("/users")
+    @PutMapping("/users") // UsersView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public UserDTO updateUser(@RequestBody UserDTO userDTO) {
         User user = userRepository.findById(userDTO.id()).orElse(null);
@@ -83,7 +83,7 @@ public class UserController {
         return new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getType());
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/users/{id}") // UsersView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public void  updateUser(@PathVariable("id") int id) {
         User user = userRepository.findById(id).orElse(null);

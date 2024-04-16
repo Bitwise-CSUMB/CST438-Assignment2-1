@@ -36,7 +36,7 @@ public class EnrollmentController {
 
     // instructor downloads student enrollments for a section, ordered by student name
     // user must be instructor for the section
-    @GetMapping("/sections/{sectionNo}/enrollments")
+    @GetMapping("/sections/{sectionNo}/enrollments") // EnrollmentsView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public List<EnrollmentDTO> getEnrollments(
         @PathVariable("sectionNo") final int sectionNo,
@@ -58,7 +58,7 @@ public class EnrollmentController {
 
     // instructor uploads enrollments with the final grades for the section
     // user must be instructor for the section
-    @PutMapping("/enrollments")
+    @PutMapping("/enrollments") // EnrollmentsView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public void updateEnrollmentGrade(
         @RequestBody final List<EnrollmentDTO> dlist,
