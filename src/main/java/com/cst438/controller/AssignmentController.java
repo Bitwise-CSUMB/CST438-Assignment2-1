@@ -1,22 +1,38 @@
 package com.cst438.controller;
 
-import com.cst438.domain.*;
+import com.cst438.domain.Assignment;
+import com.cst438.domain.AssignmentRepository;
+import com.cst438.domain.Enrollment;
+import com.cst438.domain.EnrollmentRepository;
+import com.cst438.domain.Grade;
+import com.cst438.domain.GradeRepository;
+import com.cst438.domain.Section;
+import com.cst438.domain.SectionRepository;
+import com.cst438.domain.Term;
+import com.cst438.domain.User;
+import com.cst438.domain.UserRepository;
 import com.cst438.dto.AssignmentDTO;
 import com.cst438.dto.AssignmentStudentDTO;
 import com.cst438.dto.GradeDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.sql.Date;
-import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -42,28 +58,20 @@ public class AssignmentController {
     @GetMapping("/sections/{secNo}/assignments")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public List<AssignmentDTO> getAssignments(
-            @PathVariable("secNo") int secNo) {
+        @PathVariable("secNo") final int secNo,
+        final Principal principal)
+    {
+        // hint: use the assignment repository method findBySectionNoOrderByDueDate to return a list of assignments
 
-        // hint: use the assignment repository method
-        // findBySectionNoOrderByDueDate to return
-        // a list of assignments
+        // validate user is the instructor of the section
+        ControllerUtils.validateInstructorAndInstructorForSection(userRepository, principal, sectionRepository, secNo);
 
         // Fetch assignments from repository
-        List<Assignment> assignments = assignmentRepository.findBySectionNoOrderByDueDate(secNo);
-
-        if (assignments.isEmpty()) {
-            return new ArrayList<AssignmentDTO>();
-        }
+        final List<Assignment> assignments = assignmentRepository.findBySectionNoOrderByDueDate(secNo);
 
         // Convert Assignment entities to DTOs
         return assignments.stream()
-            .map(assignment -> new AssignmentDTO(
-                assignment.getAssignmentId(),
-                assignment.getTitle(),
-                assignment.getDueDate().toString(),
-                assignment.getSection().getCourse().getCourseId(),
-                assignment.getSection().getSecId(),
-                assignment.getSection().getSectionNo()))
+            .map(AssignmentDTO::fromEntity)
             .collect(Collectors.toList());
     }
 
@@ -73,37 +81,32 @@ public class AssignmentController {
     @PostMapping("/assignments")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public AssignmentDTO createAssignment(
-            @RequestBody AssignmentDTO assignmentDTO) {
+        @RequestBody final AssignmentDTO assignmentDTO,
+        final Principal principal)
+    {
+        // validate user is the instructor of the section
+        final var validateRet = ControllerUtils.validateInstructorAndInstructorForSection(
+            userRepository, principal, sectionRepository, assignmentDTO.secNo()
+        );
+        final Section section = validateRet.section();
+        final Term term = section.getTerm();
 
-        Section s = sectionRepository.findById(assignmentDTO.secNo()).orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "Section " + assignmentDTO.secNo() + " not found"));
-
-
-        Assignment a = new Assignment();
-        a.setSection(s);
-
-        java.sql.Date sqlDueDate;
-        try {
-            // Parse the string directly into a java.sql.Date object
-            sqlDueDate = java.sql.Date.valueOf(assignmentDTO.dueDate());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid due date format");
-        }
-
-        // get the end date of the class associated with the assignment
-        Date classStartDate = s.getTerm().getStartDate();
-        Date classEndDate = s.getTerm().getEndDate();
+        // get the start and end date of the term associated with the assignment
+        final java.sql.Date sqlDueDate = parseDueDate(assignmentDTO);
+        final Date classStartDate = term.getStartDate();
+        final Date classEndDate = term.getEndDate();
 
         // check if the due date is past the end date of the class
         if (sqlDueDate.before(classStartDate) || sqlDueDate.after(classEndDate)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad due date; section " + s.getSectionNo() +
-                " timeframe: " + classStartDate + " - " + classEndDate);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad due date; section "
+                + section.getSectionNo() + " timeframe: " + classStartDate + " - " + classEndDate);
         }
-        a.setDueDate(sqlDueDate);
+
+        final Assignment newAssignment = new Assignment();
+        newAssignment.setSection(section);
 
         // assignmentId generated by database
-
-        return getAssignmentDTO(assignmentDTO, a);
+        return updateAssignmentTitleAndDueDate(newAssignment, assignmentDTO);
     }
 
     // update assignment for a section. Only title and dueDate may be changed.
@@ -111,57 +114,52 @@ public class AssignmentController {
     // return updated AssignmentDTO
     @PutMapping("/assignments")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
-    public AssignmentDTO updateAssignment(@RequestBody AssignmentDTO assignmentDTO) {
+    public AssignmentDTO updateAssignment(
+        @RequestBody final AssignmentDTO assignmentDTO,
+        final Principal principal)
+    {
+        // validate user is the instructor of the section
+        ControllerUtils.validateInstructorAndInstructorForSection(userRepository,
+            principal, sectionRepository, assignmentDTO.secNo());
+
         if (assignmentDTO.title().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Assignment title not entered");
         }
-        Assignment a = assignmentRepository.findById(assignmentDTO.id()).orElseThrow(() ->
+
+        final Assignment assignment = assignmentRepository.findById(assignmentDTO.id()).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found for ID: " + assignmentDTO.id()));
-        return getAssignmentDTO(assignmentDTO, a);
-    }
 
-    private AssignmentDTO getAssignmentDTO(
-        @RequestBody AssignmentDTO assignmentDTO,
-        Assignment a) {
-        a.setTitle(assignmentDTO.title());
-
-        java.sql.Date sqlDueDate;
-        try {
-            // Parse the string directly into a java.sql.Date object
-            sqlDueDate = java.sql.Date.valueOf(assignmentDTO.dueDate());
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid due date format");
-        }
-        a.setDueDate(sqlDueDate);
-
-        assignmentRepository.save(a);
-
-        return new AssignmentDTO(
-            a.getAssignmentId(),
-            a.getTitle(),
-            a.getDueDate().toString(),
-            a.getSection().getCourse().getCourseId(),
-            a.getSection().getSecId(),
-            a.getSection().getSectionNo()
-        );
+        return updateAssignmentTitleAndDueDate(assignment, assignmentDTO);
     }
 
     // delete assignment for a section
     // logged-in user must be instructor of the section
     @DeleteMapping("/assignments/{assignmentId}")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
-    public void deleteAssignment(@PathVariable("assignmentId") int assignmentId) {
+    public void deleteAssignment(
+        @PathVariable("assignmentId") final int assignmentId,
+        final Principal principal)
+    {
+        final Assignment assignment = assignmentRepository.findByAssignmentId(assignmentId);
 
-        Assignment a = assignmentRepository.findByAssignmentId(assignmentId);
-        assignmentRepository.delete(a);
+        if (assignment == null) {
+            return;
+        }
+
+        // validate user is the instructor of the section
+        ControllerUtils.validateInstructorAndInstructorForSection(userRepository, principal, assignment.getSection());
+
+        assignmentRepository.delete(assignment);
     }
 
     // instructor gets grades for assignment ordered by student name
     // user must be instructor for the section
     @GetMapping("/assignments/{assignmentId}/grades")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
-    public List<GradeDTO> getAssignmentGrades(@PathVariable("assignmentId") int assignmentId) {
-
+    public List<GradeDTO> getAssignmentGrades(
+        @PathVariable("assignmentId") final int assignmentId,
+        final Principal principal)
+    {
         // get the list of enrollments for the section related to this assignment.
         // hint: use te enrollment repository method
         // findEnrollmentsBySectionOrderByStudentName.
@@ -170,32 +168,33 @@ public class AssignmentController {
         // if the grade does not exist, create a grade entity and set the score to NULL
         // and then save the new entity
 
-        Assignment a = assignmentRepository.findByAssignmentId(assignmentId);
+        final Assignment assignment = assignmentRepository.findByAssignmentId(assignmentId);
 
-        if (a == null) {
+        if (assignment == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment " + assignmentId + " not found");
         }
 
-        List<Enrollment> enrollments = enrollmentRepository
-                .findEnrollmentsBySectionNoOrderByStudentName(a.getSection().getSectionNo());
+        // validate user is the instructor of the section
+        ControllerUtils.validateInstructorAndInstructorForSection(userRepository, principal, assignment.getSection());
 
-        List<GradeDTO> grades = new ArrayList<GradeDTO>();
-        for (Enrollment e : enrollments) {
-            Grade g = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), a.getAssignmentId());
-            Section s = a.getSection();
-            Course c = s.getCourse();
-            User u = e.getUser();
+        final List<Enrollment> enrollments = enrollmentRepository
+            .findEnrollmentsBySectionNoOrderByStudentName(assignment.getSection().getSectionNo());
 
-            if (g == null) {
-                g = new Grade();
-                g.setAssignment(a);
-                g.setEnrollment(e);
-                g.setScore(null);
-                gradeRepository.save(g);
+        final List<GradeDTO> grades = new ArrayList<>();
+        for (Enrollment enrollment : enrollments) {
+
+            Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(
+                enrollment.getEnrollmentId(), assignment.getAssignmentId());
+
+            if (grade == null) {
+                grade = new Grade();
+                grade.setAssignment(assignment);
+                grade.setEnrollment(enrollment);
+                grade.setScore(null);
+                grade = gradeRepository.save(grade);
             }
-            GradeDTO dto = new GradeDTO(g.getGradeId(), u.getName(), u.getEmail(),
-                        a.getTitle(), c.getCourseId(), s.getSecId(), g.getScore());
-            grades.add(dto);
+
+            grades.add(GradeDTO.fromEntity(grade));
         }
 
         return grades;
@@ -205,24 +204,27 @@ public class AssignmentController {
     // user must be instructor for the section
     @PutMapping("/grades")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
-    public void updateGrades(@RequestBody List<GradeDTO> dlist) {
+    public void updateGrades(
+        @RequestBody final List<GradeDTO> dlist,
+        final Principal principal)
+    {
+        // validate user is an instructor
+        final User user = ControllerUtils.validateInstructor(userRepository, principal);
 
         // for each grade in the GradeDTO list, retrieve the grade entity
-        for (GradeDTO gradeDTO : dlist) {
-            // find the Grade entity
-            Grade grade = null;
-            Optional<Grade> optionalGrade = gradeRepository.findById(gradeDTO.gradeId());
-            if (optionalGrade.isPresent()) {
-                grade = optionalGrade.get();
-                // update the score and save the entity
-                grade.setScore(gradeDTO.score());
-                gradeRepository.save(grade);
-            } else {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Invalid gradeId: " + gradeDTO.gradeId());
-            }
-        }
+        for (final GradeDTO gradeDTO : dlist) {
 
+            // find the Grade entity
+            final Grade grade = gradeRepository.findById(gradeDTO.gradeId()).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid gradeId: " + gradeDTO.gradeId()));
+
+            // validate user is the instructor of the assignment's section
+            ControllerUtils.validateInstructorForSection(user, grade.getAssignment().getSection());
+
+            // update the score and save the entity
+            grade.setScore(gradeDTO.score());
+            gradeRepository.save(grade);
+        }
     }
 
     // student lists their assignments/grades for an enrollment ordered by due date
@@ -230,50 +232,45 @@ public class AssignmentController {
     @GetMapping("/assignments")
     @PreAuthorize("hasAuthority('SCOPE_ROLE_STUDENT')")
     public List<AssignmentStudentDTO> getStudentAssignments(
-            @RequestParam("year") int year,
-            @RequestParam("semester") String semester,
-            Principal principal)
+        @RequestParam("year") final int year,
+        @RequestParam("semester") final String semester,
+        final Principal principal)
     {
         // return a list of assignments and (if they exist) the assignment grade
         // for all sections that the student is enrolled for the given year and semester
         // hint: use the assignment repository method
         // findByStudentIdAndYearAndSemesterOrderByDueDate
 
-        final User user = ControllerUtils.validateStudent(userRepository, principal);
-        final int studentId = user.getId();
+        final int studentId = ControllerUtils.validateStudent(userRepository, principal).getId();
 
-        List<Assignment> assignments = assignmentRepository.findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
+        final List<Assignment> assignments = assignmentRepository
+            .findByStudentIdAndYearAndSemesterOrderByDueDate(studentId, year, semester);
+
         if (assignments.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No assignments found for studentId " + studentId
-            + " in the year " + year + " in the semester " + semester);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No assignments found for studentId "
+                + studentId + " in the year " + year + " in the semester " + semester);
         }
-        List<AssignmentStudentDTO> dto_list = new ArrayList<>();
-        for (Assignment a : assignments) {
-            Enrollment e = enrollmentRepository.findEnrollmentBySectionNoAndStudentId(a.getSection().getSectionNo(), studentId);
-            Grade g = gradeRepository.findByEnrollmentIdAndAssignmentId(e.getEnrollmentId(), a.getAssignmentId());
-            if (g != null) {
-                dto_list.add(new AssignmentStudentDTO(
-                    a.getAssignmentId(),
-                    a.getTitle(),
-                    a.getDueDate(),
-                    a.getSection().getCourse().getCourseId(),
-                    a.getSection().getSecId(),
-                    g.getScore()
-                ));
-            } else {
-                dto_list.add(new AssignmentStudentDTO(
-                    a.getAssignmentId(),
-                    a.getTitle(),
-                    a.getDueDate(),
-                    a.getSection().getCourse().getCourseId(),
-                    a.getSection().getSecId(),
-                    null
-                ));
+
+        final List<AssignmentStudentDTO> dtoList = new ArrayList<>();
+        for (final Assignment assignment : assignments) {
+
+            final Enrollment enrollment = enrollmentRepository.findEnrollmentBySectionNoAndStudentId(
+                assignment.getSection().getSectionNo(), studentId
+            );
+            final Grade grade = gradeRepository.findByEnrollmentIdAndAssignmentId(
+                enrollment.getEnrollmentId(), assignment.getAssignmentId());
+
+            if (grade != null) {
+                dtoList.add(AssignmentStudentDTO.fromGradeEntity(grade));
+            }
+            else {
+                dtoList.add(AssignmentStudentDTO.fromAssignmentEntity(assignment));
             }
         }
-        return dto_list;
+        return dtoList;
     }
 
+    // TODO - Unused
     @GetMapping("/allassignments")
     public List<AssignmentDTO> getAllAssignments() {
         List<Assignment> assignments = assignmentRepository.findAllAssignments();
@@ -284,5 +281,21 @@ public class AssignmentController {
                     a.getSection().getSectionNo()));
         }
         return dto_list;
+    }
+
+    private AssignmentDTO updateAssignmentTitleAndDueDate(Assignment assignment, final AssignmentDTO assignmentDTO) {
+        assignment.setTitle(assignmentDTO.title());
+        assignment.setDueDate(parseDueDate(assignmentDTO));
+        return AssignmentDTO.fromEntity(assignmentRepository.save(assignment));
+    }
+
+    private static java.sql.Date parseDueDate(AssignmentDTO assignmentDTO) {
+        try {
+            // Parse the string directly into a java.sql.Date object
+            return java.sql.Date.valueOf(assignmentDTO.dueDate());
+        }
+        catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid due date format");
+        }
     }
 }

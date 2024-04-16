@@ -80,6 +80,7 @@ public class CourseController {
         }
     }
 
+    // TODO - Any logged in user
     @GetMapping("/courses")
     public List<CourseDTO> getAllCourses() {
         List<Course> courses = courseRepository.findAllByOrderByCourseIdAsc();
@@ -90,6 +91,7 @@ public class CourseController {
         return dto_list;
     }
 
+    // TODO - Unused
     @GetMapping("/terms")
     public List<Term> getAllTerms() {
         return termRepository.findAllByOrderByTermIdDesc();

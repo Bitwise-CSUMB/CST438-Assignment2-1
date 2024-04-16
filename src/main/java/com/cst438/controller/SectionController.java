@@ -121,6 +121,7 @@ public class SectionController {
     // get Sections for a course with request params year, semester
     // example URL   /course/cst363/sections?year=2024&semester=Spring
     // also specify partial courseId   /course/cst/sections?year=2024&semester=Spring
+    // TODO - Any logged in user
     @GetMapping("/courses/{courseId}/sections")
     public List<SectionDTO> getSections(
             @PathVariable("courseId") String courseId,
@@ -190,6 +191,7 @@ public class SectionController {
         return dto_list;
     }
 	
+    // TODO - Any logged in user
     @GetMapping("/sections/open")
     public List<SectionDTO> getOpenSectionsForEnrollment() {
 
