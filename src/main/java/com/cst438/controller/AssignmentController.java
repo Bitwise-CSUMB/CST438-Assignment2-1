@@ -267,9 +267,9 @@ public class AssignmentController {
         final Assignment assignment,
         final AssignmentDTO assignmentDTO)
     {
-        validateDueDate(assignment.getSection(), assignmentDTO);
+        final java.sql.Date sqlDueDate = validateDueDate(assignment.getSection(), assignmentDTO);
         assignment.setTitle(assignmentDTO.title());
-        assignment.setDueDate(parseDueDate(assignmentDTO));
+        assignment.setDueDate(sqlDueDate);
         return AssignmentDTO.fromEntity(assignmentRepository.save(assignment));
     }
 
@@ -283,8 +283,9 @@ public class AssignmentController {
         }
     }
 
-    private static void validateDueDate(final Section section, final AssignmentDTO assignmentDTO) {
+    private static java.sql.Date validateDueDate(final Section section, final AssignmentDTO assignmentDTO) {
 
+        // get the start and end date of the term associated with the assignment
         final java.sql.Date sqlDueDate = parseDueDate(assignmentDTO);
         final Term term = section.getTerm();
         final Date classStartDate = term.getStartDate();
@@ -295,5 +296,6 @@ public class AssignmentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad due date; section "
                 + section.getSectionNo() + " timeframe: " + classStartDate + " - " + classEndDate);
         }
+        return sqlDueDate;
     }
 }
