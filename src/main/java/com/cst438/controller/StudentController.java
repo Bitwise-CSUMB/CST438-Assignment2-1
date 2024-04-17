@@ -41,8 +41,7 @@ public class StudentController {
     private UserRepository userRepository;
 
     // student gets transcript showing list of all enrollments
-    // studentId will be temporary until Login security is implemented
-    // example URL  /transcript?studentId=19803
+    // example URL   /transcripts
     @GetMapping("/transcripts") // Transcript.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_STUDENT')")
     public List<EnrollmentDTO> getTranscript(
@@ -63,7 +62,6 @@ public class StudentController {
 
     // student gets a list of their enrollments for the given year, semester
     // user must be student
-    // studentId will be temporary until Login security is implemented
     @GetMapping("/enrollments") // ScheduleView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_STUDENT')")
     public List<EnrollmentDTO> getSchedule(

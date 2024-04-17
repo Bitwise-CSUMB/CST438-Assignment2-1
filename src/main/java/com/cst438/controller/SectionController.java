@@ -119,8 +119,8 @@ public class SectionController {
 
 
     // get Sections for a course with request params year, semester
-    // example URL   /course/cst363/sections?year=2024&semester=Spring
-    // also specify partial courseId   /course/cst/sections?year=2024&semester=Spring
+    // example URL   /courses/cst363/sections?year=2024&semester=Spring
+    // also specify partial courseId   /courses/cst/sections?year=2024&semester=Spring
     // Role: Any logged in user
     @GetMapping("/courses/{courseId}/sections") // SectionsView.js
     public List<SectionDTO> getSections(
@@ -156,7 +156,7 @@ public class SectionController {
     }
 
     // get Sections for an instructor
-    // example URL  /sections?instructorEmail=dwisneski@csumb.edu&year=2024&semester=Spring
+    // example URL   /sections?year=2024&semester=Spring
     @GetMapping("/sections") // InstructorSectionsView.js
     @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public List<SectionDTO> getSectionsForInstructor(
