@@ -255,7 +255,7 @@ public class AssignmentController {
         return dtoList;
     }
 
-    // TODO - Unused
+    // Note: Unused
 //    @GetMapping("/allassignments")
 //    public List<AssignmentDTO> getAllAssignments() {
 //        return assignmentRepository.findAllAssignments().stream()
