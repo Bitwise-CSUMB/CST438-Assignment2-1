@@ -4,9 +4,11 @@ import com.cst438.domain.*;
 import com.cst438.dto.SectionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +30,8 @@ public class SectionController {
 
 
     // ADMIN function to create a new section
-    @PostMapping("/sections")
+    @PostMapping("/sections") // SectionAdd.js
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public SectionDTO addSection(@RequestBody SectionDTO section) {
 
         Course course = courseRepository.findById(section.courseId()).orElse(null);
@@ -66,6 +69,7 @@ public class SectionController {
                 s.getTerm().getYear(),
                 s.getTerm().getSemester(),
                 s.getCourse().getCourseId(),
+                s.getCourse().getTitle(),
                 s.getSecId(),
                 s.getBuilding(),
                 s.getRoom(),
@@ -76,7 +80,8 @@ public class SectionController {
     }
 
     // ADMIN function to update a section
-    @PutMapping("/sections")
+    @PutMapping("/sections") // SectionUpdate.js
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public void updateSection(@RequestBody SectionDTO section) {
         // can only change instructor email, sec_id, building, room, times, start, end dates
         Section s = sectionRepository.findById(section.secNo()).orElse(null);
@@ -103,7 +108,8 @@ public class SectionController {
 
     // ADMIN function to create a delete section
     // delete will fail there are related assignments or enrollments
-    @DeleteMapping("/sections/{sectionno}")
+    @DeleteMapping("/sections/{sectionno}") // SectionsView.js
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
     public void deleteSection(@PathVariable int sectionno) {
         Section s = sectionRepository.findById(sectionno).orElse(null);
         if (s != null) {
@@ -113,9 +119,10 @@ public class SectionController {
 
 
     // get Sections for a course with request params year, semester
-    // example URL   /course/cst363/sections?year=2024&semester=Spring
-    // also specify partial courseId   /course/cst/sections?year=2024&semester=Spring
-    @GetMapping("/courses/{courseId}/sections")
+    // example URL   /courses/cst363/sections?year=2024&semester=Spring
+    // also specify partial courseId   /courses/cst/sections?year=2024&semester=Spring
+    // Role: Any logged in user
+    @GetMapping("/courses/{courseId}/sections") // SectionsView.js
     public List<SectionDTO> getSections(
             @PathVariable("courseId") String courseId,
             @RequestParam("year") int year ,
@@ -135,6 +142,7 @@ public class SectionController {
                     s.getTerm().getYear(),
                     s.getTerm().getSemester(),
                     s.getCourse().getCourseId(),
+                    s.getCourse().getTitle(),
                     s.getSecId(),
                     s.getBuilding(),
                     s.getRoom(),
@@ -148,13 +156,15 @@ public class SectionController {
     }
 
     // get Sections for an instructor
-    // example URL  /sections?instructorEmail=dwisneski@csumb.edu&year=2024&semester=Spring
-    @GetMapping("/sections")
+    // example URL   /sections?year=2024&semester=Spring
+    @GetMapping("/sections") // InstructorSectionsView.js
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_INSTRUCTOR')")
     public List<SectionDTO> getSectionsForInstructor(
-            @RequestParam("email") String instructorEmail,
             @RequestParam("year") int year ,
-            @RequestParam("semester") String semester )  {
+            @RequestParam("semester") String semester,
+            Principal principal)  {
 
+        String instructorEmail = principal.getName();
 
         List<Section> sections = sectionRepository.findByInstructorEmailAndYearAndSemester(instructorEmail, year, semester);
 
@@ -169,6 +179,7 @@ public class SectionController {
                     s.getTerm().getYear(),
                     s.getTerm().getSemester(),
                     s.getCourse().getCourseId(),
+                    s.getCourse().getTitle(),
                     s.getSecId(),
                     s.getBuilding(),
                     s.getRoom(),
@@ -179,8 +190,9 @@ public class SectionController {
         }
         return dto_list;
     }
-	
-    @GetMapping("/sections/open")
+
+    // Role: Any logged in user
+    @GetMapping("/sections/open") // CourseEnroll.js
     public List<SectionDTO> getOpenSectionsForEnrollment() {
 
         List<Section> sections = sectionRepository.findByOpenOrderByCourseIdSectionId();
@@ -193,6 +205,7 @@ public class SectionController {
                     s.getTerm().getYear(),
                     s.getTerm().getSemester(),
                     s.getCourse().getCourseId(),
+                    s.getCourse().getTitle(),
                     s.getSecId(),
                     s.getBuilding(),
                     s.getRoom(),

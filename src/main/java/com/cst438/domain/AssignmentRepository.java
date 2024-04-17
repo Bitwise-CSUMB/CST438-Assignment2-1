@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface AssignmentRepository extends CrudRepository<Assignment, Integer> {
 
-    @Query("select a from Assignment a")
-    List<Assignment> findAllAssignments();
+//    @Query("select a from Assignment a")
+//    List<Assignment> findAllAssignments();
 
     @Query("select a from Assignment a where a.assignmentId=:assignmentId")
     Assignment findByAssignmentId(int assignmentId);
